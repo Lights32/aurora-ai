@@ -1,0 +1,1281 @@
+/* ==========================================================================
+   1. CSS VARIABLES & THEME OVERRIDES
+   ========================================================================== */
+
+/* Default (light) theme variables */
+:root {
+  /* Colors */
+  --color-primary-light: #6a0dad;
+  --color-primary-dark: #4b0082;
+  --color-surface-0: #fff;
+  --color-surface-1: #e5e2e7;
+  --color-surface-2: #f8f9fa;
+  --color-surface-3: #eeeeee;
+  --color-surface-accent: #f5f0ff;
+  --color-text-primary: #212529;
+  --color-text-secondary: #6c757d;
+  --color-success: #28a745;
+  --color-warning: #ffc107;
+  --color-error: #dc3545;
+
+  /* Transitions & Shadows */
+  --transition-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-large: 0 var(--size-xl) 2.5rem -var(--size-s) rgba(0, 0, 0, 0.12),
+    0 var(--size-s) var(--size-l) -var(--size-s) rgba(0, 0, 0, 0.12);
+
+  /* Sizing & Border */
+  --border-radius-default: 1em;
+  --size-xs: 0.25rem;
+  --size-s: 0.5rem;
+  --size-m: 0.75rem;
+  --size-l: 1rem;
+  --size-xl: 1.5rem;
+  --size-xxl: 2rem;
+  --size-base: 0.875rem;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --color-primary-light: #5e0c9c;
+  --color-primary-dark: #420073;
+  --color-surface-0: #fff;
+  --color-surface-1: #121212;
+  --color-surface-2: #1e1e1e;
+  --color-surface-3: #2c2c2c;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #8a8a8a;
+  --color-success: #00c851;
+  --color-warning: #fb3;
+  --color-error: #f44;
+  --shadow-large: 0 var(--size-xl) 2.5rem -var(--size-s) #0000004d,
+    0 var(--size-s) var(--size-l) -var(--size-s) #0000004d;
+}
+
+/* ==========================================================================
+     2. GLOBAL RESET & BASE STYLES
+     ========================================================================== */
+
+/* Reset box sizing and spacing */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Text selection styling */
+::selection {
+  color: var(--color-surface-0);
+  background: var(--color-primary-light);
+  text-shadow: none;
+}
+
+/* Base body styling */
+body {
+  background: var(--color-surface-1);
+  color: var(--color-text-primary);
+  font-family: "Sora", sans-serif;
+  line-height: 1.6;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  gap: var(--size-l);
+  transition: background 0.2s var(--transition-default);
+}
+
+/* Anchor links */
+a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+}
+
+/* ==========================================================================
+     3. LAYOUT CONTAINERS & STRUCTURE
+     ========================================================================== */
+
+/* App container */
+.app-container {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--size-xl);
+  box-sizing: border-box;
+  height: calc(100%);
+  padding: 0 1%;
+}
+
+/* App header (e.g. top navigation) */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-top: var(--size-m);
+  align-items: center;
+}
+
+/* Topbar (additional header/container) */
+.topbar {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: var(--size-m);
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Navigation container */
+.nav-container {
+  display: flex;
+  gap: var(--size-xl);
+  align-items: center;
+}
+
+li {
+  margin-left: var(--size-l);
+  font-weight: 300;
+}
+
+/* ==========================================================================
+     4. TYPOGRAPHY & TEXT EFFECTS
+     ========================================================================== */
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(155deg,
+      var(--color-primary-light),
+      var(--color-surface-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 400;
+  width: max-content;
+  display: none;
+}
+
+.model-badge {
+  font-size: var(--size-base);
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  padding: 0.25em 0.75em;
+  border-radius: calc(var(--border-radius-default) * 0.5);
+}
+
+/* ==========================================================================
+     5. BUTTONS & INTERACTIVE CONTROLS
+     ========================================================================== */
+
+/* Base button font */
+button {
+  font-family: "Sora", sans-serif;
+}
+
+/* Button group layout */
+.button-group {
+  display: flex;
+  gap: var(--size-s);
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+  position: relative;
+  background-color: var(--color-primary-light);
+  color: var(--color-surface-0);
+  border: none;
+  border-radius: var(--border-radius-default);
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 var(--size-s) var(--size-l) #0003;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-primary-dark);
+  transition: background 0.2s var(--transition-default),
+    color 0.2s var(--transition-default);
+  transform: translateY(1px);
+}
+
+/* New chat button */
+.new-chat-btn {
+  position: relative;
+  background-color: var(--color-primary-light);
+  color: var(--color-surface-0);
+  border: none;
+  border-radius: var(--border-radius-default);
+  width: min-content;
+  padding: 0 var(--size-l);
+  gap: var(--size-m);
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 var(--size-s) var(--size-l) #0003;
+}
+
+.new-chat-btn:hover {
+  background: var(--color-primary-dark);
+  transform: scale(0.98);
+  color: var(--color-surface-0);
+}
+
+.new-chat-btn:active {
+  transform: scale(0.95);
+}
+
+/* File input button */
+.file-button {
+  background: var(--color-surface-3);
+  color: var(--color-text-primary);
+  border: none;
+  border-radius: var(--border-radius-default);
+  cursor: pointer;
+  height: 3.5rem;
+  width: 3.5rem;
+  transition: all 0.2s var(--transition-default);
+}
+
+.file-button:hover {
+  background: var(--color-primary-light);
+  transform: translateY(1px);
+}
+
+.file-button i {
+  font-size: var(--size-l);
+}
+
+/* ==========================================================================
+     6. FOOTER
+     ========================================================================== */
+
+footer {
+  display: flex;
+  position: relative;
+  bottom: 0;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  padding: var(--size-s) var(--size-l);
+  background: var(--color-surface-2);
+  border-top-left-radius: var(--border-radius-default);
+  border-top-right-radius: var(--border-radius-default);
+  /* Note: originally set to display: none; */
+  display: none;
+}
+
+footer p {
+  text-align: center;
+  font-size: var(--size-base);
+  color: var(--color-text-secondary);
+}
+
+.model-info {
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+}
+
+/* ==========================================================================
+     7. CHAT INTERFACE COMPONENTS
+     ========================================================================== */
+
+/* Chat container wrapper */
+.chat-wrapper {
+  background: var(--color-surface-1);
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--shadow-large);
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+  transition: background 0.2s var(--transition-default);
+  flex: 1;
+  margin-bottom: var(--size-m);
+  border-top: 1px solid var(--color-surface-2);
+}
+
+/* Chat history (scrollable messages) */
+.chat-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-l);
+  padding: var(--size-xl);
+  overflow-y: auto;
+  flex: 1;
+  min-height: min-content;
+  scrollbar-width: var(--size-xl);
+}
+
+/* Placeholder for empty chat */
+.chat-placeholder {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* override flex if needed */
+  margin: auto auto;
+  color: var(--color-text-secondary);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--size-xxl);
+  text-align: center;
+}
+
+/* Combined message styling */
+.message {
+  max-width: 67%;
+  padding: var(--size-l) var(--size-xl);
+  border-radius: var(--border-radius-default);
+  animation: messageIn 0.4s var(--transition-default);
+  color: var(--color-text-primary);
+  transition: opacity 0.4s var(--transition-default);
+  opacity: 0.16;
+  font-size: var(--size-base);
+  /* Additional properties */
+  word-wrap: break-word;
+  hyphens: auto;
+  overflow-anchor: auto;
+}
+
+/* Focus-visible state for messages */
+.message:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+  transition: all 0.2s var(--transition-default);
+}
+
+/* Message images */
+.message img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-default);
+  margin: var(--size-s) 0;
+}
+
+.message p {
+  margin-top: var(--size-l);
+}
+
+.message strong {
+  font-weight: 700;
+}
+
+/* Spacing for successive paragraphs, pre blocks and blockquotes */
+.message p+p,
+.message pre,
+.message blockquote {
+  margin-top: var(--size-xxl);
+}
+
+/* Horizontal rule spacing in messages */
+.message hr {
+  margin: var(--size-xl) 0;
+}
+
+/* Headings inside messages */
+.message h1,
+.message h2,
+.message h3,
+.message h4,
+.message h5,
+.message h6 {
+  line-height: 1.3;
+  border-radius: var(--border-radius-default);
+  width: fit-content;
+  font-weight: 300;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  padding-bottom: var(--size-s);
+}
+
+/* User message (right aligned) */
+.user-message {
+  border-bottom-right-radius: calc(var(--border-radius-default) * 0.125);
+  background: var(--color-primary-dark);
+  margin-left: auto;
+  min-width: 25%;
+  box-shadow: 0 2px var(--size-s) rgba(0, 0, 0, 0.12);
+  color: var(--color-surface-0);
+  max-width: 67%;
+}
+
+/* AI message (left aligned) */
+.ai-message {
+  border-bottom-left-radius: calc(var(--border-radius-default) * 0.125);
+  background: var(--color-surface-2);
+  margin-right: auto;
+  line-height: 1.6;
+  width: 100%;
+}
+
+/* Error message styling */
+.error-message {
+  background: var(--color-error);
+  color: var(--color-surface-0);
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* Increase opacity on hover or for recent messages */
+.error-message:last-of-type,
+.user-message:nth-last-of-type(2),
+.ai-message:last-of-type,
+.error-message:hover,
+.user-message:hover,
+.ai-message:hover {
+  opacity: 1;
+  transition: opacity 0.15s var(--transition-default);
+}
+
+/* Message header (meta information) */
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--size-l);
+  font-size: var(--size-m);
+  opacity: 0.8;
+  gap: var(--size-l);
+}
+
+.user-message .message-header {
+  color: var(--color-surface-0);
+}
+
+/* Username & timestamp within messages */
+.message-username {
+  width: max-content;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  display: flex;
+  flex-direction: row;
+  gap: var(--size-m);
+}
+
+.message-timestamp,
+.message-request-time {
+  text-align: right;
+  width: max-content;
+}
+
+/* ==========================================================================
+     8. FORM ELEMENTS & INPUT GROUPS
+     ========================================================================== */
+
+/* Input groups wrapping form elements */
+.input-group {
+  border-top: 1px solid var(--color-surface-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  gap: var(--size-l);
+}
+
+/* Row of input field and send button */
+.input-field {
+  display: flex;
+  gap: var(--size-m);
+  justify-content: start;
+  align-items: flex-end;
+}
+
+/* Textarea styling for chat input */
+textarea {
+  background: var(--color-surface-3);
+  border: none;
+  color: var(--color-text-primary);
+  border-radius: var(--border-radius-default);
+  resize: none;
+  flex: 1;
+  height: auto;
+  max-height: 24rem;
+  width: 100%;
+  padding: var(--size-l);
+  padding-top: 1.25rem;
+  min-height: 3.5rem;
+  font-family: "Sora", sans-serif;
+  overflow-y: auto;
+  transition: all 0.2s var(--transition-default);
+  font-size: var(--size-base);
+}
+
+textarea:focus {
+  outline: 2px solid var(--color-primary-light);
+  box-shadow: 0 0 0 2px var(--color-surface-2);
+  transition: outline 0.2s ease;
+}
+
+textarea::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.5;
+}
+
+/* Standard input fields */
+input {
+  border-radius: var(--border-radius-default);
+  padding: var(--size-l);
+  border: none;
+  background: var(--color-surface-3);
+  font-family: "Sora", sans-serif;
+  color: var(--color-text-primary);
+}
+
+input:focus {
+  outline: 2px solid var(--color-primary-light);
+}
+
+/* --- FORM GROUPS (Note: Two separate .form-group rules are provided) --- */
+
+/* .form-group (Grid Layout version) */
+.form-group {
+  display: grid;
+  grid-template-columns: 2fr 5fr;
+  gap: var(--size-l);
+}
+
+/* Label styling inside forms */
+label {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+
+/* .form-group (Flex Layout version; overrides grid version when both apply) */
+.form-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+/* Form element container */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-s);
+}
+
+/* Select elements within form groups */
+.form-group select {
+  border-radius: var(--border-radius-default);
+  padding: var(--size-l);
+  border: none;
+  background: var(--color-surface-3);
+  font-family: "Sora", sans-serif;
+  color: var(--color-text-primary);
+}
+
+.form-group select:focus {
+  outline: 2px solid var(--color-primary-light);
+  transition: all 0.2s var(--transition-default);
+  border-radius: var(--border-radius-default);
+}
+
+/* User profile form container */
+#userProfileForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-m);
+}
+
+/* API key input custom scroll (if any) */
+#apiKeyInput {
+  scrollbar-width: 0;
+}
+
+/* ==========================================================================
+     9. SEND BUTTON & LOADING INDICATORS
+     ========================================================================== */
+
+/* Send button (e.g. chat submit) */
+.send-button {
+  background: var(--color-primary-light);
+  color: var(--color-surface-0);
+  border: none;
+  border-radius: var(--border-radius-default);
+  cursor: pointer;
+  height: 3.5rem;
+  width: 3.5rem;
+  transition: all 0.2s var(--transition-default);
+}
+
+.send-button:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(1px);
+}
+
+/* Cancel variant for send button */
+.send-button.cancel {
+  background: var(--color-error);
+}
+
+.send-button.cancel:hover {
+  background: #a30d0d;
+}
+
+/* Loading indicator container */
+.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-s);
+  padding: var(--size-l) 1.75rem;
+  background: var(--color-surface-3);
+  border-radius: var(--border-radius-default);
+  margin: var(--size-s) 0;
+  font-size: var(--size-base);
+  animation: pulse 3s infinite;
+  color: var(--color-text-primary);
+}
+
+/* Loading dots container */
+.loading-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Individual loading dot */
+.loading-dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: wave 1.4s infinite ease-in-out;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* ==========================================================================
+     10. MODALS & MODAL ACTIONS
+     ========================================================================== */
+
+/* Modal overlay */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #00000080;
+  backdrop-filter: blur(var(--size-l));
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal content container */
+.modal-content {
+  background: var(--color-surface-2);
+  padding: var(--size-xl);
+  border-radius: var(--size-xl);
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 var(--size-s) var(--size-xl) #00000026;
+  color: var(--color-text-primary);
+  font-size: var(--size-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-xl);
+}
+
+/* Modal actions (buttons row) */
+.modal-actions {
+  display: flex;
+  gap: var(--size-xl);
+  justify-content: flex-end;
+  margin-top: var(--size-xl);
+}
+
+/* Base modal button */
+.modal-btn {
+  font-family: "Sora", sans-serif;
+  background: transparent;
+  border: none;
+  padding: var(--size-l) var(--size-xxl);
+  border-radius: var(--border-radius-default);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--size-l);
+  font-size: var(--size-base);
+  width: fit-content;
+}
+
+.modal-btn:hover {
+  transform: scale(0.96);
+  opacity: 0.9;
+  color: var(--color-text-primary);
+}
+
+.modal-btn:active {
+  transform: scale(0.96);
+}
+
+/* Confirm modal button variant */
+.modal-btn.confirm {
+  background: var(--color-primary-light);
+  border: none;
+  padding: var(--size-l) var(--size-xxl);
+  border-radius: var(--border-radius-default);
+  color: var(--color-surface-0);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--size-l);
+  font-size: var(--size-base);
+  width: fit-content;
+  justify-self: end;
+}
+
+.modal-btn.confirm:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Additional modal controls */
+#clearCacheBtn {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-1);
+}
+
+#clearCacheBtn:hover {
+  color: var(--color-surface-0);
+  background-color: var(--color-primary-dark);
+}
+
+/* ==========================================================================
+     11. AGENT PARAMETERS & DETAIL PILLS
+     ========================================================================== */
+
+.mode-nav {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Container for detail controls */
+.detail-control {
+  display: flex;
+  justify-content: center;
+}
+
+/* Base styling for mode, detail, model and test pills */
+.mode-pill,
+.detail-pill,
+.model-pill,
+.test-pill {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  padding: var(--size-s) 1.25rem;
+  border-radius: calc(var(--border-radius-default) * 0.88);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--size-s);
+  transition: all 0.2s var(--transition-default);
+  font-family: "Sora", sans-serif;
+  font-size: var(--size-base);
+}
+
+/* Hover state for pills */
+.mode-pill:hover,
+.detail-pill:hover,
+.model-pill:hover,
+.test-pill:hover {
+  background: var(--color-surface-1);
+  transition: all 0.2s var(--transition-default);
+}
+
+/* Active state for pills */
+.mode-pill.active,
+.detail-pill.active,
+.model-pill.active .test-pill:active {
+  background: var(--color-primary-light);
+  color: var(--color-surface-0);
+  border-color: var(--color-primary-light);
+  transition: all 0.2s var(--transition-default);
+}
+
+/* Focus-visible state for pills */
+.mode-pill:focus-visible,
+.detail-pill:focus-visible,
+.model-pill:focus-visible,
+.test-pill:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+  transition: all 0.2s var(--transition-default);
+}
+
+/* Extra hover and active states for detail pills */
+.detail-pill:hover {
+  background: var(--color-surface-2);
+  transition: all 0.2s var(--transition-default);
+}
+
+.detail-pill.active {
+  background: var(--color-primary-light);
+  color: var(--color-surface-0);
+  border-color: var(--color-primary-light);
+  transition: all 0.2s var(--transition-default);
+}
+
+.detail-pill i {
+  font-size: 0.9em;
+}
+
+/* Agent parameters bar (scrollable horizontal list) */
+.agent-parameters {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--size-m);
+  padding: 0 0rem;
+  overflow-x: scroll;
+  scrollbar-width: none;
+}
+
+/* Model and test switchers */
+.model-pills,
+.test-pills,
+.mode-nav,
+.detail-pills {
+  display: flex;
+  gap: var(--size-s);
+  background: var(--color-surface-3);
+  padding: var(--size-s);
+  border-radius: var(--border-radius-default);
+  transition: all 0.2s var(--transition-default);
+}
+
+.model-pill:hover,
+.test-pill:hover {
+  background: var(--color-surface-2);
+  transition: all 0.2s var(--transition-default);
+}
+
+.model-pill.active,
+.test-pill:active {
+  background: var(--color-primary-light);
+  color: var(--color-surface-0);
+  transition: all 0.2s var(--transition-default);
+}
+
+/* ==========================================================================
+     12. MESSAGE CONTENT & CODE BLOCKS
+     ========================================================================== */
+
+.message {
+  font-size: var(--size-base);
+  font-size: calc(var(--size-base) * 1.2);
+  line-height: 1.9;
+}
+
+/* Images within message content */
+.message-content img {
+  max-width: 100%;
+  border-radius: var(--size-xl);
+  margin: var(--size-l) 0;
+}
+
+/* Preformatted code blocks within messages */
+.message-content pre {
+  background: var(--color-surface-1);
+  border-radius: calc(var(--border-radius-default) * 0.5);
+  padding: var(--size-m);
+  margin: 1em 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 0.8rem;
+  border: 2px solid var(--color-surface-2);
+}
+
+/* Inline code within message content */
+.message-content code {
+  font-family: monospace, "Sora", sans-serif;
+  font-size: 0.8rem;
+}
+
+/* Code inside pre blocks should not get extra styling */
+.message-content pre code {
+  background: none !important;
+  padding: 0;
+  font-family: "Sora", sans-serif;
+  text-shadow: none;
+  color: var(--color-text-primary);
+}
+
+/* Remove text-shadow for JavaScript code */
+.language-javascript {
+  text-shadow: none;
+}
+
+/* Inline code (not inside a pre) styling */
+.message-content code:not(pre code) {
+  background: rgba(175, 184, 193, 0.2);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Standalone code blocks */
+pre.code-block {
+  background: #2d2d2d;
+  color: #ccc;
+  padding: 1em;
+  margin: 0.5em 0;
+  border-radius: 0.3em;
+  overflow-x: auto;
+}
+
+/* Code styling for language-specific blocks */
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: "Fira Code", Consolas, Monaco, "Andale Mono", "Ubuntu Mono",
+    monospace;
+  font-size: var(--size-base);
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+}
+
+/* ==========================================================================
+     13. ATTACHMENTS & FILE INPUTS
+     ========================================================================== */
+
+/* Wrapper for custom file input */
+.file-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+#fileInput {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-input-wrapper:hover {
+  transform: translateY(2px);
+  transition: all 0.2s var(--transition-default);
+}
+
+/* Attachment previews container */
+.attachment-previews {
+  display: flex;
+  gap: var(--size-s);
+  flex-wrap: wrap;
+  margin-top: var(--size-xs);
+}
+
+/* Individual attachment preview */
+.attachment-preview {
+  background: var(--color-surface-3);
+  padding: var(--size-s) var(--size-l);
+  border-radius: var(--border-radius-default);
+  display: flex;
+  align-items: center;
+  gap: var(--size-s);
+  font-size: var(--size-base);
+}
+
+.attachment-preview button {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0 var(--size-xs);
+}
+
+/* Message attachment styling */
+.message-attachment {
+  background: var(--color-surface-3);
+  border-radius: var(--size-l);
+  padding: var(--size-s);
+  margin-top: var(--size-m);
+  display: flex;
+  align-items: center;
+  gap: var(--size-m);
+  max-width: 300px;
+}
+
+/* Attachment icon container */
+.attachment-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachment-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--size-s);
+}
+
+.attachment-icon .fa-file {
+  color: var(--color-text-secondary);
+  font-size: var(--size-base);
+}
+
+/* Attachment file name styling */
+.attachment-name {
+  font-size: var(--size-base);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+     14. XXXXX
+     ========================================================================== */
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--size-s);
+}
+
+.ai-cot-message {
+  border-left: 2px solid var(--color-surface-3);
+  border-radius: 0;
+  line-height: 1.6;
+}
+
+.ai-cot-message p+p {
+  margin-bottom: var(--size-l);
+}
+
+.ai-cot-message:hover {
+  opacity: 1;
+}
+
+/* ==========================================================================
+     15. ADDITIONAL UTILITIES
+     ========================================================================== */
+
+/* Inline text chunk */
+.text-chunk {
+  display: inline;
+}
+
+/* Fake cursor effect */
+.fake-cursor {
+  display: inline;
+  margin-left: 4px;
+  position: relative;
+  opacity: 0.24;
+  top: -2px;
+  font-size: 1.2em;
+}
+
+/* Utility to hide elements */
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+     16. ANIMATIONS & KEYFRAMES
+     ========================================================================== */
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--size-xl));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.24;
+  }
+}
+
+@keyframes wave {
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+     17. MEDIA QUERIES
+     ========================================================================== */
+
+@media (max-width: 767px) {
+
+  /* Responsive styles can be added here */
+  .message {
+    font-size: calc(var(--size-base) * 1.15) !important;
+    line-height: 1.6;
+    max-width: calc(100% - var(--size-xxl));
+  }
+
+  .chat-history {
+    padding: var(--size-s);
+  }
+
+  .app-container {
+    padding: 0 var(--size-s);
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-direction: column-reverse;
+  }
+
+  .topbar .button-group {
+    width: 100%;
+    justify-content: space-between;
+    align-items: space-between;
+    flex-direction: row-reverse;
+  }
+
+  .topbar .mode-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .agent-parameters {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .switcher {
+    width: fit-content;
+  }
+
+  .switcher .model-pills {
+    width: fit-content;
+  }
+
+  .mode-pill.active,
+  .detail-pill.active,
+  .model-pill.active .test-pill:active {
+    flex-grow: 1;
+    max-width: 50%;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s var(--transition-default);
+  }
+}
+
+/* ==========================================================================
+   TABLE STYLES
+   ========================================================================== */
+
+/* Base table styling */
+table {
+  margin-top: var(--size-l);
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--size-l);
+  background: var(--color-surface-1);
+  box-shadow: var(--shadow-large);
+  border-radius: var(--border-radius-default);
+  overflow: hidden;
+  /* Ensures rounded corners on all browsers */
+}
+
+/* Table header styling */
+table thead {
+  background: var(--color-surface-3);
+  color: var(--color-surface-0);
+}
+
+table thead th {
+  padding: var(--size-s) var(--size-m);
+  text-align: left;
+  font-size: var(--size-base);
+  border-bottom: 2px solid var(--color-surface-1);
+  line-height: 1.15;
+}
+
+/* Table body styling */
+table tbody tr {
+  transition: background 0.2s var(--transition-default);
+}
+
+/* Zebra striping for better readability */
+table tbody tr:nth-child(even) {
+  background: var(--color-surface-1);
+}
+
+table tbody tr:hover {
+  background: var(--color-surface-3);
+}
+
+table tbody td {
+  padding: var(--size-s) var(--size-m);
+  border-bottom: 1px solid var(--color-surface-1);
+  font-size: var(--size-base);
+  color: var(--color-text-primary);
+}
+
+/* Table footer styling (optional) */
+table tfoot {
+  background: var(--color-surface-1);
+  color: var(--color-text-secondary);
+}
+
+table tfoot td {
+  padding: var(--size-s) var(--size-m);
+  border-top: 2px solid var(--color-primary-light);
+}
+
+/* ==========================================================================
+     END OF CSS
+     ========================================================================== */

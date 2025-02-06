@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <title>Aurora AI Agent - DeepSeek Integration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Highlight.js CSS (choose a theme, e.g., default) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <!-- Highlight.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>
+      const APP_VERSION = "v0.5.1 α";
+      function formatLastModified(date) {
+        // Array of month names for easy lookup
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+
+        const day = date.getDate();
+        const monthName = months[date.getMonth()];
+        const year = date.getFullYear();
+
+        // Handle 12-hour format with am/pm
+        let hours24 = date.getHours();
+        let minutes = date.getMinutes();
+        let ampm = hours24 >= 12 ? "pm" : "am";
+
+        // Convert to 12-hour format
+        let hours12 = hours24 % 12 || 12;
+
+        // Ensure minutes are always two digits (e.g., "07")
+        let paddedMinutes = minutes.toString().padStart(2, "0");
+
+        // Build the formatted date string
+        return `Last updated ${day} ${monthName} ${year} at ${hours12}:${paddedMinutes}${ampm}`;
+      }
+    </script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+
+
+  </head>
+
+  <body>
+    <main class="app-container">
+      <header class="app-header">
+
+        <div class="topbar">
+          <h1 class="gradient-text">
+            Aurora AI <span class="model-badge">DeepSeek R1</span>
+          </h1>
+
+        
+        <nav class="mode-nav">
+          <button class="mode-pill active" data-mode="coding" tabindex="0">
+            <!-- <i class="fas fa-code"></i> -->
+            Developer
+          </button>
+          <button class="mode-pill" data-mode="creator" tabindex="0">
+            <!-- <i class="fas fa-palette"></i> -->
+            Creator
+          </button>
+          <button class="mode-pill" data-mode="analyst" tabindex="0">
+            <!-- <i class="fas fa-graduation-cap"></i> -->
+            Analyst
+          </button>
+        </nav>
+      <div class="button-group">
+        <button
+        id="newChatBtn"
+        class="new-chat-btn"
+        aria-label="Start new chat"
+      >
+        <i class="fas fa-plus"></i>New&nbsp;Chat
+      </button>
+        <button
+          class="theme-toggle-btn"
+          id="themeToggleBtn"
+          aria-label="Toggle theme"
+        >
+          <i class="fas fa-adjust"></i>
+        </button>
+      </header>
+    </div>
+  </div>
+
+      <section class="chat-wrapper">
+        <div class="chat-history" id="chatContainer" role="log">
+            <div id="chatPlaceholder" class="chat-placeholder" aria-live="polite">
+            <p>Welcome to Aurora AI Agent. Start the conversation!</p>
+          </div>
+        </div>
+        <div class="input-group">
+          <div id="attachmentPreviews" class="attachment-previews"></div>
+
+          <div class="input-field">
+            <div class="file-input-wrapper">
+              <input
+                type="file"
+                id="fileInput"
+                accept=".txt,.md,.jpg,.jpeg,.png,.gif"
+                multiple
+              />
+              <button
+                id="fileUploadBtn"
+                class="file-button"
+                aria-label="Upload file"
+              >
+                <i class="fas fa-file-upload"></i>
+              </button>
+            </div>
+            <textarea
+              id="userInput"
+              placeholder="Ask Aurora anything …"
+              aria-label="Chat input"
+              rows="1"
+            ></textarea>
+            <button id="sendBtn" class="send-button" aria-label="Send message">
+              <i class="fas fa-comment"></i>
+            </button>
+          </div>
+
+          <div class="agent-parameters">
+
+            <div class="switcher">
+              <div class="model-pills">
+                <button
+                  class="model-pill active"
+                  data-model="deepseek-chat"
+                  title="Chat Model"
+                >
+                  <i class="fas fa-layer-group"></i> Standard
+                </button>
+                <button
+                  class="model-pill"
+                  data-model="deepseek-reasoner"
+                  title="Reasoner Model"
+                >
+                  <i class="fas fa-brain"></i> Reasoner
+                </button>
+              </div>
+            </div>
+
+
+            <div class="detail-control">
+              <div class="detail-pills">
+                
+                <button
+                  class="detail-pill"
+                  data-detail="concise"
+                  title="Short explanation"
+                >
+                  <!-- <i class="fas fa-align-left"></i> -->
+                  Concise
+                </button>
+                <button
+                  class="detail-pill"
+                  data-detail="balanced"
+                  title="Balanced response"
+                  aria-current="true"
+                >
+                  <!-- <i class="fas fa-scale-balanced"></i> -->
+                  Balanced
+                </button>
+                <button
+                  class="detail-pill"
+                  data-detail="detailed"
+                  title="In-depth analysis"
+                >
+                  <!-- <i class="fas fa-book"></i> -->
+                  Contextual
+                </button>
+              </div>
+            </div>
+
+            <div class="test-switcher">
+              <div class="test-pills">
+                <button id="userProfileBtn" class="test-pill active">
+                  <i class="fas fa-user"></i>
+                </button>
+                <button id="settingsBtn" class="test-pill">
+                  <i class="fas fa-cog"></i>
+                </button>
+                <button class="test-pill">
+                  <i class="fas fa-globe"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <small class="model-info" loading="lazy">
+            Aurora AI&nbsp;<span id="versionNumber"></span>&nbsp;|&nbsp;<span
+              id="lastModified"
+            ></span>
+          </small>
+        </div>
+      </section>
+    </main>
+    <!-- <aside></aside> -->
+
+    <footer>
+      <p class="footer-text">2025 &copy; Kilian Werner – Deepseek R1 powered</p>
+    </footer>
+
+    <div id="confirmationModal" class="modal">
+      <div class="modal-content">
+        <h3>New Chat Confirmation</h3>
+        <p>
+          The current conversation history will be lost and Aurora's Memory will be wiped.<br />
+        </p>
+        <div class="modal-actions">
+          <button id="modalCancel" class="modal-btn">Cancel</button>
+          <button id="modalConfirm" class="modal-btn confirm">New Chat</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="userProfileModal" class="modal">
+      <div class="modal-content">
+        <h3>User Profile</h3>
+        <form id="userProfileForm">
+          <div class="form-group">
+            <label for="userName">Name</label>
+            <input
+              type="text"
+              id="userName"
+              name="userName"
+              placeholder="Enter your name"
+            />
+          </div>
+          <div class="form-group">
+            <label for="userLanguage">Language</label>
+            <select id="userLanguage" required>
+              <option value="english">English</option>
+              <option value="german">Deutsch</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="profileCancel" class="modal-btn">
+              Cancel
+            </button>
+            <button type="submit" id="profileSave" class="modal-btn confirm">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+      <div class="modal-content">
+        <h3>Settings</h3>
+        <form id="settingsForm">
+          <div class="form-group">
+            <label for="apiKeyInput">API Key</label>
+            <input
+              type="password"
+              id="apiKeyInput"
+              name="apiKeyInput"
+              placeholder="Enter DeepSeek API key"
+            />
+          </div>
+          <button type="button" id="clearCacheBtn" class="modal-btn">
+            <i class="fas fa-trash"></i>Clear&nbsp;Cache
+          </button>
+          <div class="modal-actions">
+            <button type="button" id="settingsCancel" class="modal-btn">
+              Cancel
+            </button>
+            <button type="submit" id="settingsSave" class="modal-btn confirm">
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+      marked.setOptions({
+        breaks: true,
+      });
+    </script>
+    <script>
+      const chatContainer = document.getElementById("chatContainer");
+      const chatPlaceholder = document.getElementById("chatPlaceholder");
+      const sendBtn = document.getElementById("sendBtn");
+      const userInput = document.getElementById("userInput");
+
+      // Load the version number and last modified date
+      // Insert the version number
+      document.getElementById("versionNumber").textContent = APP_VERSION;
+
+      // Format and insert the last modified date
+      const lastModifiedDate = new Date(document.lastModified);
+      document.getElementById("lastModified").textContent =
+        formatLastModified(lastModifiedDate);
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+  </body>
+</html>
