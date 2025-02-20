@@ -153,7 +153,6 @@ li {
   color: transparent;
   font-weight: 400;
   width: max-content;
-  display: none;
 }
 
 .model-badge {
@@ -162,6 +161,7 @@ li {
   color: var(--color-text-secondary);
   padding: 0.25em 0.75em;
   border-radius: calc(var(--border-radius-default) * 0.5);
+  display: none;
 }
 
 /* ==========================================================================
@@ -771,17 +771,22 @@ form {
   flex-direction: row;
 }
 
-/* Container for detail controls */
-.detail-control {
+.mode-nav,
+.detail-switcher,
+.model-switcher,
+.settings-switcher {
   display: flex;
   justify-content: center;
+  justify-self: center;
+  align-self: center;
+  height: 3rem;
 }
 
-/* Base styling for mode, detail, model and test pills */
+/* Base styling for mode, detail, model and settings pills */
 .mode-pill,
 .detail-pill,
 .model-pill,
-.test-pill {
+.settings-pill {
   background: transparent;
   border: none;
   color: var(--color-text-secondary);
@@ -800,7 +805,7 @@ form {
 .mode-pill:hover,
 .detail-pill:hover,
 .model-pill:hover,
-.test-pill:hover {
+.settings-pill:hover {
   background: var(--color-surface-1);
   transition: all 0.2s var(--transition-default);
 }
@@ -808,7 +813,7 @@ form {
 /* Active state for pills */
 .mode-pill.active,
 .detail-pill.active,
-.model-pill.active .test-pill:active {
+.model-pill.active {
   background: var(--color-primary-light);
   color: var(--color-surface-0);
   border-color: var(--color-primary-light);
@@ -819,27 +824,10 @@ form {
 .mode-pill:focus-visible,
 .detail-pill:focus-visible,
 .model-pill:focus-visible,
-.test-pill:focus-visible {
+.settings-pill:focus-visible {
   outline: 2px solid var(--color-primary-light);
   outline-offset: 2px;
   transition: all 0.2s var(--transition-default);
-}
-
-/* Extra hover and active states for detail pills */
-.detail-pill:hover {
-  background: var(--color-surface-2);
-  transition: all 0.2s var(--transition-default);
-}
-
-.detail-pill.active {
-  background: var(--color-primary-light);
-  color: var(--color-surface-0);
-  border-color: var(--color-primary-light);
-  transition: all 0.2s var(--transition-default);
-}
-
-.detail-pill i {
-  font-size: 0.9em;
 }
 
 /* Agent parameters bar (scrollable horizontal list) */
@@ -855,11 +843,11 @@ form {
   scrollbar-width: none;
 }
 
-/* Model and test switchers */
-.model-pills,
-.test-pills,
+/* Agent Parameter Switchers */
 .mode-nav,
-.detail-pills {
+.model-pills,
+.detail-pills,
+.settings-pills {
   display: flex;
   gap: var(--size-s);
   background: var(--color-surface-3);
@@ -869,16 +857,26 @@ form {
 }
 
 .model-pill:hover,
-.test-pill:hover {
+.settings-pill:hover {
   background: var(--color-surface-2);
   transition: all 0.2s var(--transition-default);
 }
 
 .model-pill.active,
-.test-pill:active {
+.settings-pill:active {
   background: var(--color-primary-light);
   color: var(--color-surface-0);
   transition: all 0.2s var(--transition-default);
+}
+
+.settings-pills {
+  display: flex;
+  gap: var(--size-s);
+  background: var(--color-surface-3);
+  padding: var(--size-s);
+  border-radius: var(--border-radius-default);
+  transition: all 0.2s var(--transition-default);
+  width: fit-content;
 }
 
 /* ==========================================================================
@@ -886,8 +884,7 @@ form {
      ========================================================================== */
 
 .message {
-  font-size: var(--size-base);
-  font-size: calc(var(--size-base) * 1.2);
+  font-size: calc(var(--size-base) * 1);
   line-height: 1.9;
 }
 
@@ -907,7 +904,6 @@ form {
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-size: 0.8rem;
   border: 2px solid var(--color-surface-2);
 }
 
@@ -1194,17 +1190,23 @@ pre[class*="language-"] {
     justify-content: center;
   }
 
-  .switcher {
+  .model-switcher,
+  .detail-switcher,
+  .mode-switcher,
+  .settings-switcher {
     width: fit-content;
   }
 
-  .switcher .model-pills {
+  .model-pills,
+  .mode-pills,
+  .detail-pills,
+  .settings-pills {
     width: fit-content;
   }
 
   .mode-pill.active,
   .detail-pill.active,
-  .model-pill.active .test-pill:active {
+  .model-pill.active .settings-pill:active {
     flex-grow: 1;
     max-width: 50%;
     align-items: center;
