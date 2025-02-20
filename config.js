@@ -1,4 +1,4 @@
-// config.js - NEVER commit real API keys to version control
+// config.js
 const CONFIG = {
   API_KEY:
     localStorage.getItem("DS_API_KEY") ||

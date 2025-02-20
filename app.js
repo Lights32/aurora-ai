@@ -198,15 +198,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const languageInstruction = languageMap[language] || languageMap.english;
       const prompts = {
         coding:
-          "You are Aurora, an AI assistant specialized in advising and teaching the creation, modification, improvement, and management of code files and projects. Always analyze provided code and monitor all changes chronologically. " +
+          "You are Aurora, an advanced AI assistant specializing in coding. You provide expert guidance on creating, modifying, optimizing, and managing code files and projects. Always perform a detailed analysis of provided code and maintain a clear, chronological record of all changes. When answering, structure your output with clear headings, subheadings, and bullet points where appropriate. Present code within well-formatted code blocks, include concise inline comments, and explain your thought process in plain language. Your responses should be both precise and accessible to intermediate web developers and beginner programmers." +
           namePart +
           languageInstruction,
         creator:
-          "You are Aurora, an AI assistant specialized in advising and teaching the creation of all art and media. Emphasize creativity while remaining informative. " +
+          "You are Aurora, an advanced AI assistant specializing in art and media creation. You provide insightful, creative guidance from conceptualization to production, balancing innovation with practical execution. Structure your responses with clear sections—begin with an overview, then break down your creative strategy, techniques, and any required steps. Use descriptive language, include visual references or design suggestions as needed, and format your output using bullet points, numbered lists, and headers for clarity. Ensure that your output is both inspirational and actionable." +
           namePart +
           languageInstruction,
         analyst:
-          "You are Aurora, an AI assistant specialized in advising and teaching about science, finance, and legal topics. Provide the user with maximum advantages by offering evidence, proof, and sources for key points. " +
+          "You are Aurora, an advanced AI assistant specializing in analysis and advice on science, finance, and legal topics. Provide comprehensive, evidence-based insights supported by credible sources. Structure your output with a clear introduction, detailed analysis sections, and a concise conclusion. Use subheadings and bullet points to organize information, and include citations where applicable. Your analysis should be logically organized, transparent, and easily navigable, ensuring that all key points are clearly articulated and supported by evidence." +
           namePart +
           languageInstruction,
       };
@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
     field.style.overflowY = naturalH >= maxH ? "auto" : "hidden";
   }
 
-  function typeText(element, rawText, onComplete, charsPerTick = 1, delay = 4) {
+  function typeText(element, rawText, onComplete, charsPerTick = 1, delay = 1) {
     let index = 0;
     let tempBuffer = "";
     const length = rawText.length;
@@ -374,7 +374,8 @@ document.addEventListener("DOMContentLoaded", () => {
     messageId = null,
     settings = null,
     skipTyping = false,
-    processingTime = null
+    processingTime = null,
+    onComplete = null // Optional callback for when typing animation finishes
   ) {
     const frag = new DocumentFragment();
     const messageDiv = document.createElement("div");
@@ -382,63 +383,58 @@ document.addEventListener("DOMContentLoaded", () => {
     if (messageId && type === "user") {
       messageDiv.dataset.messageId = messageId;
     }
-    if (type === "ai-cot") {
-      messageDiv.innerHTML = `<span class="message-content"></span>`;
-    } else {
+
+    // Build header HTML based on message type
+    let headerHTML = "";
+    if (type === "user") {
+      headerHTML = `
+        <div class="message-header">
+          <span class="message-username">${
+            state.userProfile?.name ? state.userProfile.name + " (You)" : "You"
+          }</span>
+          <div class="row">
+            <span class="message-timestamp" data-timestamp="${new Date().toISOString()}">
+              ${getTimeAgo(new Date())}
+            </span>
+          </div>
+        </div>
+      `;
+    } else if (type === "ai" || type === "assistant" || type === "ai-cot") {
       const modeLabel = settings?.mode || state.currentMode;
       const estimatedTokens = Math.ceil(content.length / 4);
       const processingTimeHTML =
         type === "ai" && processingTime
-          ? `<span class="message-request-time" data-timestamp="${new Date().toISOString()}">
-                  ${processingTime}&nbsp;s
-                </span>`
+          ? `<span class="message-request-time">${processingTime}&nbsp;s</span>`
           : "";
       const tokenEstimateHTML =
         type !== "error"
           ? `<span class="message-token-estimate"><span style="color:var(--color-text-secondary);">♦&nbsp;</span>${estimatedTokens}&nbsp;Tokens</span>`
           : "";
-      messageDiv.innerHTML = `
-            <div class="message-header">
-              <span class="message-username">
-                ${
-                  type === "user"
-                    ? state.userProfile?.name
-                      ? `${state.userProfile.name} (You)`
-                      : "You"
-                    : `<div>${modeLabel} → Aurora&nbsp;⚙</div>Aurora`
-                }
-              </span>
-              <div class="row">
-                ${processingTimeHTML}
-                ${tokenEstimateHTML}
-                <span class="message-timestamp" data-timestamp="${new Date().toISOString()}">
-                  ${getTimeAgo(new Date())}
-                </span>
-              </div>
-            </div>
-            <span class="message-content"></span>
-          `;
-      // For handling "/end" command
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          const userInput = state.uiElements.userInput.value.trim();
-          if (userInput === "/cancel") {
-            cancelCurrentRequest();
-            state.uiElements.userInput.value = "";
-          }
-        }
-      });
-      function cancelCurrentRequest() {
-        if (state.isLoading) {
-          state.isLoading = false;
-          hideLoading();
-          state.pendingMessages.clear();
-          console.warn("Request canceled by user");
-          addMessage("Request canceled by user", "error");
-        }
-      }
+      headerHTML = `
+        <div class="message-header">
+          <span class="message-username">
+            ${
+              type === "ai-cot"
+                ? "Reasoning"
+                : `<div>${modeLabel} → Aurora&nbsp;⚙</div>Aurora`
+            }
+          </span>
+          <div class="row">
+            ${processingTimeHTML}
+            ${tokenEstimateHTML}
+            <span class="message-timestamp" data-timestamp="${new Date().toISOString()}">
+              ${getTimeAgo(new Date())}
+            </span>
+          </div>
+        </div>
+      `;
     }
+
+    // Insert header HTML along with a container for the message content
+    messageDiv.innerHTML = `${headerHTML}<span class="message-content"></span>`;
     const contentElement = messageDiv.querySelector(".message-content");
+
+    // Render content
     if (type === "user" || type === "error") {
       contentElement.innerHTML =
         type === "error"
@@ -453,26 +449,27 @@ document.addEventListener("DOMContentLoaded", () => {
         typeText(contentElement, content, () => {
           contentElement.innerHTML = marked.parse(DOMPurify.sanitize(content));
           messageDiv.classList.remove("typing");
+          if (typeof onComplete === "function") onComplete();
         });
       }
     } else if (type === "ai-cot") {
-      contentElement.innerHTML = marked.parse(DOMPurify.sanitize(content));
-    }
-    frag.appendChild(messageDiv);
-    if (type === "ai" && messageId) {
-      const pendingObj = state.pendingMessages.get(messageId);
-      if (pendingObj) {
-        const requestTimeSpan = messageDiv.querySelector(
-          ".message-request-time"
-        );
-        if (requestTimeSpan && processingTime) {
-          requestTimeSpan.textContent = `${processingTime} s`;
-        }
-        pendingObj.element.after(frag);
-        state.pendingMessages.delete(messageId);
-        return;
+      messageDiv.classList.add("typing");
+      // For messages loaded from history, skip animation
+      if (skipTyping) {
+        contentElement.innerHTML = marked.parse(DOMPurify.sanitize(content));
+        messageDiv.classList.remove("typing");
+        if (typeof onComplete === "function") onComplete();
+      } else {
+        typeText(contentElement, content, () => {
+          contentElement.innerHTML = marked.parse(DOMPurify.sanitize(content));
+          messageDiv.classList.remove("typing");
+          if (typeof onComplete === "function") onComplete();
+        });
       }
-    } else if (insertAfter) {
+    }
+
+    frag.appendChild(messageDiv);
+    if (insertAfter) {
       insertAfter.after(frag);
     } else {
       state.uiElements.chatContainer.appendChild(frag);
@@ -526,15 +523,7 @@ document.addEventListener("DOMContentLoaded", () => {
         addMessage(msg.content, "user", null, null, null, true);
         lastUserElement = state.uiElements.chatContainer.lastElementChild;
       } else if (msg.role === "assistant") {
-        addMessage(
-          msg.content,
-          "ai",
-          lastUserElement,
-          null,
-          null,
-          true,
-          msg.processingTime
-        );
+        addMessage(msg.content, "ai", null, null, true, msg.processingTime);
       } else if (msg.role === "error") {
         addMessage(msg.content, "error", null, null, null, true);
       } else if (msg.role === "assistant-cot") {
@@ -841,34 +830,56 @@ document.addEventListener("DOMContentLoaded", () => {
         : "N/A";
       const finalAnswer =
         data.choices[0]?.message?.content || "No response received";
-      addMessage(
-        finalAnswer,
-        "ai",
-        null,
-        messagePayload.id,
-        messagePayload.settings,
-        false,
-        processingTime
-      );
-      state.chatHistory.push({
-        role: "assistant",
-        content: finalAnswer,
-        processingTime: processingTime,
-      });
       const chainOfThought = data.choices[0]?.message?.reasoning_content;
+
       if (chainOfThought) {
+        // Save both messages immediately.
+        state.chatHistory.push({
+          role: "assistant-cot",
+          content: chainOfThought,
+        });
+        state.chatHistory.push({
+          role: "assistant",
+          content: finalAnswer,
+          processingTime: processingTime,
+        });
+        // Animate CoT first, then animate final answer.
         addMessage(
           chainOfThought,
           "ai-cot",
           null,
           messagePayload.id,
           messagePayload.settings,
-          false
+          false, // animate new message
+          null,
+          () => {
+            addMessage(
+              finalAnswer,
+              "ai",
+              null,
+              messagePayload.id,
+              messagePayload.settings,
+              false,
+              processingTime
+            );
+          }
         );
+      } else {
+        // No chain-of-thought: push and animate the final answer immediately.
         state.chatHistory.push({
-          role: "assistant-cot",
-          content: chainOfThought,
+          role: "assistant",
+          content: finalAnswer,
+          processingTime: processingTime,
         });
+        addMessage(
+          finalAnswer,
+          "ai",
+          null,
+          messagePayload.id,
+          messagePayload.settings,
+          false,
+          processingTime
+        );
       }
     } catch (error) {
       console.error("Error in sendMessage:", error);

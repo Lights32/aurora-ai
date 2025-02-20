@@ -105,7 +105,7 @@ a {
   gap: var(--size-xl);
   box-sizing: border-box;
   height: calc(100%);
-  padding: 0 1%;
+  padding: 0 3%;
 }
 
 /* App header (e.g. top navigation) */
@@ -152,7 +152,7 @@ li {
   -webkit-background-clip: text;
   color: transparent;
   font-weight: 400;
-  width: max-content;
+  width: fit-content;
 }
 
 .model-badge {
@@ -173,13 +173,14 @@ button {
   font-family: "Sora", sans-serif;
 }
 
-/* Button group layout */
-.button-group {
+/* Group row layout */
+.group {
   display: flex;
-  gap: var(--size-s);
   flex-direction: row;
-  justify-content: end;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: var(--size-l);
 }
 
 /* Theme toggle button */
@@ -196,6 +197,7 @@ button {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 var(--size-s) var(--size-l) #0003;
+  display: none;
 }
 
 .theme-toggle-btn:hover {
@@ -221,6 +223,7 @@ button {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 var(--size-s) var(--size-l) #0003;
+  display: none;
 }
 
 .new-chat-btn:hover {
@@ -391,16 +394,17 @@ footer p {
   line-height: 1.3;
   border-radius: var(--border-radius-default);
   width: fit-content;
-  font-weight: 300;
+  font-weight: 600;
   font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
-  padding-bottom: var(--size-s);
+  padding: var(--size-s);
+  padding-top: var(--size-xxl)
 }
 
 /* User message (right aligned) */
 .user-message {
   border-bottom-right-radius: calc(var(--border-radius-default) * 0.125);
-  background: var(--color-primary-dark);
+  background: var(--color-surface-3);
   margin-left: auto;
   min-width: 25%;
   box-shadow: 0 2px var(--size-s) rgba(0, 0, 0, 0.12);
@@ -753,29 +757,28 @@ form {
 
 /* Additional modal controls */
 #clearCacheBtn {
-  color: var(--color-text-primary);
-  background-color: var(--color-surface-1);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-2);
+  margin-top: var(--size-xs);
+  align-self: end;
+  border: 2px solid var(--color-surface-3);
 }
 
 #clearCacheBtn:hover {
   color: var(--color-surface-0);
-  background-color: var(--color-primary-dark);
+  border: 2px solid var(--color-surface-0);
 }
 
 /* ==========================================================================
      11. AGENT PARAMETERS & DETAIL PILLS
      ========================================================================== */
 
-.mode-nav {
-  display: flex;
-  flex-direction: row;
-}
-
 .mode-nav,
 .detail-switcher,
 .model-switcher,
 .settings-switcher {
   display: flex;
+  flex-direction: row;
   justify-content: center;
   justify-self: center;
   align-self: center;
@@ -837,10 +840,21 @@ form {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  gap: var(--size-m);
+  gap: var(--size-s);
   padding: 0 0rem;
   overflow-x: scroll;
   scrollbar-width: none;
+}
+
+.mobile-dropdowns {
+  display: none;
+}
+
+.ui-label {
+  font-size: calc(var(--size-base) * 1);
+  color: var(--color-text-secondary);
+  margin-right: var(--size-base);
+  display: none;
 }
 
 /* Agent Parameter Switchers */
@@ -850,7 +864,7 @@ form {
 .settings-pills {
   display: flex;
   gap: var(--size-s);
-  background: var(--color-surface-3);
+  background: var(--color-surface-2);
   padding: var(--size-s);
   border-radius: var(--border-radius-default);
   transition: all 0.2s var(--transition-default);
@@ -867,16 +881,6 @@ form {
   background: var(--color-primary-light);
   color: var(--color-surface-0);
   transition: all 0.2s var(--transition-default);
-}
-
-.settings-pills {
-  display: flex;
-  gap: var(--size-s);
-  background: var(--color-surface-3);
-  padding: var(--size-s);
-  border-radius: var(--border-radius-default);
-  transition: all 0.2s var(--transition-default);
-  width: fit-content;
 }
 
 /* ==========================================================================
@@ -1164,25 +1168,12 @@ pre[class*="language-"] {
   }
 
   .app-container {
-    padding: 0 var(--size-s);
+    padding: 0 3%;
   }
 
   .topbar {
     flex-wrap: wrap;
     justify-content: center;
-    flex-direction: column-reverse;
-  }
-
-  .topbar .button-group {
-    width: 100%;
-    justify-content: space-between;
-    align-items: space-between;
-    flex-direction: row-reverse;
-  }
-
-  .topbar .mode-nav {
-    width: 100%;
-    justify-content: space-between;
   }
 
   .agent-parameters {
@@ -1207,11 +1198,52 @@ pre[class*="language-"] {
   .mode-pill.active,
   .detail-pill.active,
   .model-pill.active .settings-pill:active {
-    flex-grow: 1;
-    max-width: 50%;
     align-items: center;
     justify-content: center;
     transition: all 0.2s var(--transition-default);
+  }
+
+  /* Show dropdowns and hide pill controls */
+  .mobile-dropdowns {
+    display: flex;
+    flex-direction: row;
+    gap: var(--size-s);
+    /* Optional styling for dropdown appearance */
+  }
+
+  .mobile-dropdowns select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--color-surface-3);
+    border: none;
+    border-radius: var(--border-radius-default);
+    color: var(--color-surface-4);
+    font-family: "Sora", sans-serif;
+    font-size: var(--size-base);
+    text-align: left;
+    width: 12rem;
+    height: 2.75rem;
+    padding: 0 var(--size-l);
+  }
+
+  .dropdown-holder::after {
+    content: "⮐";
+    font-size: var(--size-base);
+    font-size: calc(var(--size-base) * 0.8);
+    color: var(--color-text-secondary);
+    position: relative;
+    pointer-events: none;
+    margin-left: -2.5rem;
+  }
+
+  .model-switcher,
+  .mode-nav {
+    display: none;
+  }
+
+  .gradient-text {
+    font-size: calc(var(--size-base) * 2.5);
   }
 }
 
