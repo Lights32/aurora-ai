@@ -122,7 +122,7 @@ a {
   width: 100%;
   display: flex;
   flex-direction: row;
-  gap: var(--size-m);
+  gap: var(--size-xl);
   justify-content: space-between;
   align-items: center;
 }
@@ -136,7 +136,6 @@ a {
 
 li {
   margin-left: var(--size-l);
-  font-weight: 300;
 }
 
 /* ==========================================================================
@@ -183,7 +182,8 @@ button {
   gap: var(--size-l);
 }
 
-/* Theme toggle button */
+/* Square Theme toggle button */
+/*
 .theme-toggle-btn {
   position: relative;
   background-color: var(--color-primary-light);
@@ -197,7 +197,6 @@ button {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 var(--size-s) var(--size-l) #0003;
-  display: none;
 }
 
 .theme-toggle-btn:hover {
@@ -206,6 +205,7 @@ button {
     color 0.2s var(--transition-default);
   transform: translateY(1px);
 }
+*/
 
 /* New chat button */
 .new-chat-btn {
@@ -217,13 +217,12 @@ button {
   width: min-content;
   padding: 0 var(--size-l);
   gap: var(--size-m);
-  height: 3rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 var(--size-s) var(--size-l) #0003;
-  display: none;
 }
 
 .new-chat-btn:hover {
@@ -262,7 +261,8 @@ button {
      ========================================================================== */
 
 footer {
-  display: flex;
+  /* The initial display: flex is overwritten by the later display: none */
+  /* display: flex;  <-- DUPLICATE: removed in favor of display: none below */
   position: relative;
   bottom: 0;
   justify-content: center;
@@ -334,6 +334,7 @@ footer p {
 }
 
 /* Combined message styling */
+/* Merged duplicate definitions for .message */
 .message {
   max-width: 67%;
   padding: var(--size-l) var(--size-xl);
@@ -342,21 +343,21 @@ footer p {
   color: var(--color-text-primary);
   transition: opacity 0.4s var(--transition-default);
   opacity: 0.16;
-  font-size: var(--size-base);
+  /* from duplicate: font-size and line-height */
+  font-size: calc(var(--size-base) * 1);
+  line-height: 1.9;
   /* Additional properties */
   word-wrap: break-word;
   hyphens: auto;
   overflow-anchor: auto;
 }
 
-/* Focus-visible state for messages */
 .message:focus-visible {
   outline: 2px solid var(--color-primary-light);
   outline-offset: 2px;
   transition: all 0.2s var(--transition-default);
 }
 
-/* Message images */
 .message img {
   max-width: 100%;
   height: auto;
@@ -369,7 +370,7 @@ footer p {
 }
 
 .message strong {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* Spacing for successive paragraphs, pre blocks and blockquotes */
@@ -398,7 +399,7 @@ footer p {
   font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
   padding: var(--size-s);
-  padding-top: var(--size-xxl)
+  padding-top: var(--size-xxl);
 }
 
 /* User message (right aligned) */
@@ -408,8 +409,9 @@ footer p {
   margin-left: auto;
   min-width: 25%;
   box-shadow: 0 2px var(--size-s) rgba(0, 0, 0, 0.12);
-  color: var(--color-surface-0);
+  color: var(--color-text-primary);
   max-width: 67%;
+  padding-bottom: var(--size-xl);
 }
 
 /* AI message (left aligned) */
@@ -419,6 +421,7 @@ footer p {
   margin-right: auto;
   line-height: 1.6;
   width: 100%;
+  padding-bottom: var(--size-xl);
 }
 
 /* Error message styling */
@@ -449,10 +452,6 @@ footer p {
   font-size: var(--size-m);
   opacity: 0.8;
   gap: var(--size-l);
-}
-
-.user-message .message-header {
-  color: var(--color-surface-0);
 }
 
 /* Username & timestamp within messages */
@@ -539,14 +538,17 @@ input:focus {
   outline: 2px solid var(--color-primary-light);
 }
 
-/* --- FORM GROUPS (Note: Two separate .form-group rules are provided) --- */
+/* --- FORM GROUPS --- */
 
 /* .form-group (Grid Layout version) */
+/* DUPLICATE: Removed in favor of Flex Layout version below */
+/*
 .form-group {
   display: grid;
   grid-template-columns: 2fr 5fr;
   gap: var(--size-l);
 }
+*/
 
 /* Label styling inside forms */
 label {
@@ -570,13 +572,20 @@ form {
 }
 
 /* Select elements within form groups */
-.form-group select {
+select {
   border-radius: var(--border-radius-default);
-  padding: var(--size-l);
+  padding: 0 var(--size-l);
+  height: 2.75rem;
   border: none;
-  background: var(--color-surface-3);
+  background: var(--color-surface-4);
   font-family: "Sora", sans-serif;
   color: var(--color-text-primary);
+  width: 8rem;
+  outline: 2px solid var(--color-surface-3);
+}
+
+select::selection {
+  color: red;
 }
 
 .form-group select:focus {
@@ -593,7 +602,7 @@ form {
 }
 
 /* API key input custom scroll (if any) */
-#apiKeyInput {
+#apiKeyInputField {
   scrollbar-width: 0;
 }
 
@@ -786,10 +795,10 @@ form {
 }
 
 /* Base styling for mode, detail, model and settings pills */
-.mode-pill,
-.detail-pill,
-.model-pill,
-.settings-pill {
+.mode-toggle-button,
+.detail-level-button,
+.model-selection-button,
+.settings-button {
   background: transparent;
   border: none;
   color: var(--color-text-secondary);
@@ -805,18 +814,18 @@ form {
 }
 
 /* Hover state for pills */
-.mode-pill:hover,
-.detail-pill:hover,
-.model-pill:hover,
-.settings-pill:hover {
+.mode-toggle-button:hover,
+.detail-level-button:hover,
+.model-selection-button:hover,
+.settings-button:hover {
   background: var(--color-surface-1);
   transition: all 0.2s var(--transition-default);
 }
 
 /* Active state for pills */
-.mode-pill.active,
-.detail-pill.active,
-.model-pill.active {
+.mode-toggle-button.active,
+.detail-level-button.active,
+.model-selection-button.active {
   background: var(--color-primary-light);
   color: var(--color-surface-0);
   border-color: var(--color-primary-light);
@@ -824,10 +833,10 @@ form {
 }
 
 /* Focus-visible state for pills */
-.mode-pill:focus-visible,
-.detail-pill:focus-visible,
-.model-pill:focus-visible,
-.settings-pill:focus-visible {
+.mode-toggle-button:focus-visible,
+.detail-level-button:focus-visible,
+.model-selection-button:focus-visible,
+.settings-button:focus-visible {
   outline: 2px solid var(--color-primary-light);
   outline-offset: 2px;
   transition: all 0.2s var(--transition-default);
@@ -870,14 +879,14 @@ form {
   transition: all 0.2s var(--transition-default);
 }
 
-.model-pill:hover,
-.settings-pill:hover {
+.model-selection-button:hover,
+.settings-button:hover {
   background: var(--color-surface-2);
   transition: all 0.2s var(--transition-default);
 }
 
-.model-pill.active,
-.settings-pill:active {
+.model-selection-button.active,
+.settings-button:active {
   background: var(--color-primary-light);
   color: var(--color-surface-0);
   transition: all 0.2s var(--transition-default);
@@ -886,11 +895,6 @@ form {
 /* ==========================================================================
      12. MESSAGE CONTENT & CODE BLOCKS
      ========================================================================== */
-
-.message {
-  font-size: calc(var(--size-base) * 1);
-  line-height: 1.9;
-}
 
 /* Images within message content */
 .message-content img {
@@ -909,51 +913,28 @@ form {
   white-space: pre-wrap;
   word-wrap: break-word;
   border: 2px solid var(--color-surface-2);
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 /* Inline code within message content */
 .message-content code {
-  font-family: monospace, "Sora", sans-serif;
+  font-family: "Source Code Pro", monospace, "Sora", sans-serif;
   font-size: 0.8rem;
-}
-
-/* Code inside pre blocks should not get extra styling */
-.message-content pre code {
-  background: none !important;
-  padding: 0;
-  font-family: "Sora", sans-serif;
-  text-shadow: none;
-  color: var(--color-text-primary);
-}
-
-/* Remove text-shadow for JavaScript code */
-.language-javascript {
-  text-shadow: none;
+  font-weight: 500;
 }
 
 /* Inline code (not inside a pre) styling */
 .message-content code:not(pre code) {
-  background: rgba(175, 184, 193, 0.2);
+  background: var(--color-surface-3);
   padding: 0.2em 0.4em;
   border-radius: 4px;
   font-size: 0.9em;
 }
 
-/* Standalone code blocks */
-pre.code-block {
-  background: #2d2d2d;
-  color: #ccc;
-  padding: 1em;
-  margin: 0.5em 0;
-  border-radius: 0.3em;
-  overflow-x: auto;
-}
-
 /* Code styling for language-specific blocks */
 code[class*="language-"],
 pre[class*="language-"] {
-  font-family: "Fira Code", Consolas, Monaco, "Andale Mono", "Ubuntu Mono",
-    monospace;
   font-size: var(--size-base);
   text-align: left;
   white-space: pre;
@@ -963,6 +944,38 @@ pre[class*="language-"] {
   line-height: 1.5;
   tab-size: 4;
   hyphens: none;
+  font-family: "Source Code Pro", monospace;
+}
+
+/* Floating copy button for code blocks */
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  opacity: 1;
+  transition: opacity 0.3s;
+  z-index: 10;
+}
+
+pre {
+  position: relative;
+  background: var(--color-surface-2);
+  color: #ccc;
+  padding: 1em;
+  margin: 0.5em 0;
+  border-radius: 0.3em;
+  overflow-x: auto;
+}
+
+pre:hover .copy-button {
+  opacity: 1;
 }
 
 /* ==========================================================================
@@ -975,7 +988,7 @@ pre[class*="language-"] {
   display: inline-block;
 }
 
-#fileInput {
+#fileInputElement {
   position: absolute;
   left: 0;
   top: 0;
@@ -1195,22 +1208,21 @@ pre[class*="language-"] {
     width: fit-content;
   }
 
-  .mode-pill.active,
-  .detail-pill.active,
-  .model-pill.active .settings-pill:active {
+  .mode-toggle-button.active,
+  .detail-level-button.active,
+  .model-selection-button.active .settings-button:active {
     align-items: center;
     justify-content: center;
     transition: all 0.2s var(--transition-default);
   }
 
-  /* Show dropdowns and hide pill controls */
   .mobile-dropdowns {
     display: flex;
     flex-direction: row;
     gap: var(--size-s);
-    /* Optional styling for dropdown appearance */
   }
 
+  /*
   .mobile-dropdowns select {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1236,6 +1248,7 @@ pre[class*="language-"] {
     pointer-events: none;
     margin-left: -2.5rem;
   }
+  */
 
   .model-switcher,
   .mode-nav {
