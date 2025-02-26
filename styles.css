@@ -221,8 +221,8 @@ button {
   border: none;
   border-radius: var(--border-radius-default);
   gap: var(--size-m);
-  height: 3.5rem;
-  width: 3.5rem;
+  height: 3rem;
+  width: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -267,34 +267,32 @@ button {
      ========================================================================== */
 
 footer {
-  /* The initial display: flex is overwritten by the later display: none */
-  /* display: flex;  <-- DUPLICATE: removed in favor of display: none below */
-  position: relative;
-  bottom: 0;
+  display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+  bottom: 0;
   width: 100%;
   max-width: 1200px;
   padding: var(--size-s) var(--size-l);
   background: var(--color-surface-2);
   border-top-left-radius: var(--border-radius-default);
   border-top-right-radius: var(--border-radius-default);
-  /* Note: originally set to display: none; */
-  display: none;
+  gap: 0 1rem;
 }
 
 footer p {
   text-align: center;
-  font-size: var(--size-base);
+  font-size: calc(var(--size-base) * .8);
   color: var(--color-text-secondary);
 }
 
 .model-info {
-  align-self: center;
-  justify-self: center;
   text-align: center;
+  font-size: calc(var(--size-base) * .8);
   color: var(--color-text-secondary);
-
 }
 
 /* ==========================================================================
@@ -925,7 +923,7 @@ select::selection {
   display: flex;
   gap: var(--size-s);
   background: var(--color-surface-2);
-  padding: var(--size-s);
+  padding: var(--size-xs);
   border-radius: var(--border-radius-default);
   transition: all 0.2s var(--transition-default);
 }
@@ -1237,7 +1235,7 @@ pre:hover .copy-button {
      17. MEDIA QUERIES
      ========================================================================== */
 
-@media (max-width: 1200px) {
+@media (max-width: 1024px) {
 
   /* Responsive styles can be added here */
   .message {
@@ -1289,7 +1287,7 @@ pre:hover .copy-button {
   .mobile-dropdowns {
     display: flex;
     flex-direction: row;
-    gap: var(--size-s);
+    gap: var(--size-l);
     width: 100%;
     flex: 1;
   }
