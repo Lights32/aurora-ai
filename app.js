@@ -965,10 +965,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     prepareMessagesForAPI() {
-      // Filter only the system, user, and assistant messages (ignore others)
-      const baseMessages = this.appState.chatHistory.filter(m =>
-        ['system', 'user', 'assistant'].includes(m.role)
-      );
+      const includeCot = this.appState.activeModel === 'deepseek-reasoner';
+      const rolesToInclude = ['system', 'user', 'assistant'];
+      if (includeCot) {
+        rolesToInclude.push('assistant-cot');
+      }
+
+      // Filter and map messages, converting 'assistant-cot' to 'assistant' for API
+      const baseMessages = this.appState.chatHistory
+        .filter(m => rolesToInclude.includes(m.role))
+        .map(m => {
+          if (m.role === 'assistant-cot') {
+            return { ...m, role: 'assistant' };
+          }
+          return m;
+        });
 
       // Merge consecutive messages of the same role
       const mergedMessages = [];
@@ -981,20 +992,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Extract the system message (if any) and the remaining non-system messages.
+      // Extract system message and process remaining
       const systemMsg = mergedMessages.find(m => m.role === 'system');
       let nonSystem = mergedMessages.filter(m => m.role !== 'system');
 
-      // Discard any messages that occur before the first user message.
+      // Trim to messages after the first user input
       const firstUserIndex = nonSystem.findIndex(m => m.role === 'user');
-      if (firstUserIndex !== -1) {
-        nonSystem = nonSystem.slice(firstUserIndex);
-      } else {
-        // No user messages found—set nonSystem to an empty array.
-        nonSystem = [];
-      }
+      nonSystem = firstUserIndex !== -1 ? nonSystem.slice(firstUserIndex) : [];
 
-      // Build an alternating sequence (starting with a user message)
+      // Build alternating user/assistant sequence
       const alternating = [];
       let expectedRole = 'user';
       for (const msg of nonSystem) {
@@ -1002,15 +1008,11 @@ document.addEventListener('DOMContentLoaded', () => {
           alternating.push(msg);
           expectedRole = expectedRole === 'user' ? 'assistant' : 'user';
         } else if (msg.role === 'user' && expectedRole === 'assistant') {
-          // If we unexpectedly see a consecutive user message,
-          // merge its content with the previous user message.
           alternating[alternating.length - 1].content += "\n\n" + msg.content;
         }
-        // Skip any assistant message when a user message is expected.
       }
 
-      // If after processing there is no valid alternating sequence (or the first non-system message isn’t a user),
-      // return only the system message (if available) so that the API isn’t sent an initial assistant message.
+      // Combine system message with alternating messages
       const finalMessages = systemMsg ? [systemMsg, ...alternating] : alternating;
       return finalMessages;
     },
