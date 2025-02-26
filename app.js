@@ -965,69 +965,54 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     prepareMessagesForAPI() {
+      // Filter only the system, user, and assistant messages (ignore others)
       const baseMessages = this.appState.chatHistory.filter(m =>
         ['system', 'user', 'assistant'].includes(m.role)
       );
 
-      if (this.appState.activeModel === 'deepseek-reasoner') {
-        // Step 1: Merge consecutive messages from the same role
-        const mergedMessages = [];
-        let lastMessage = null;
-
-        for (const message of baseMessages) {
-          if (!lastMessage || lastMessage.role !== message.role) {
-            mergedMessages.push({ ...message });
-            lastMessage = message;
-          } else {
-            // Merge consecutive same-role messages
-            lastMessage.content += `\n\n${message.content}`;
-          }
+      // Merge consecutive messages of the same role
+      const mergedMessages = [];
+      for (const message of baseMessages) {
+        const last = mergedMessages[mergedMessages.length - 1];
+        if (last && last.role === message.role) {
+          last.content += "\n\n" + message.content;
+        } else {
+          mergedMessages.push({ ...message });
         }
-
-        // Step 2: Build valid message pairs while preserving order
-        const validSequence = [];
-        let pendingUserMessage = null;
-
-        for (const message of mergedMessages) {
-          if (message.role === 'system') {
-            validSequence.push(message);
-            continue;
-          }
-
-          if (message.role === 'user') {
-            if (pendingUserMessage) {
-              // Add previous user message without response
-              validSequence.push(pendingUserMessage);
-            }
-            pendingUserMessage = message;
-          } else if (message.role === 'assistant' && pendingUserMessage) {
-            validSequence.push(pendingUserMessage);
-            validSequence.push(message);
-            pendingUserMessage = null;
-          }
-        }
-
-        // Add any remaining user message at the end
-        if (pendingUserMessage) {
-          validSequence.push(pendingUserMessage);
-        }
-
-        // Step 3: Maintain conversation context with sliding window
-        const systemMessage = validSequence.find(m => m.role === 'system');
-        const interactionMessages = validSequence.filter(m => m.role !== 'system');
-        const recentInteractions = interactionMessages.slice(-6); // Keep last 3 pairs
-
-        // Step 4: Ensure final message is from user
-        const finalMessages = [systemMessage, ...recentInteractions];
-        if (finalMessages.length > 1 && finalMessages[finalMessages.length - 1].role !== 'user') {
-          finalMessages.pop(); // Remove trailing assistant message
-        }
-
-        return finalMessages.filter(m => m);
       }
 
-      // For deepseek-chat, return all messages as-is
-      return baseMessages;
+      // Extract the system message (if any) and the remaining non-system messages.
+      const systemMsg = mergedMessages.find(m => m.role === 'system');
+      let nonSystem = mergedMessages.filter(m => m.role !== 'system');
+
+      // Discard any messages that occur before the first user message.
+      const firstUserIndex = nonSystem.findIndex(m => m.role === 'user');
+      if (firstUserIndex !== -1) {
+        nonSystem = nonSystem.slice(firstUserIndex);
+      } else {
+        // No user messages found—set nonSystem to an empty array.
+        nonSystem = [];
+      }
+
+      // Build an alternating sequence (starting with a user message)
+      const alternating = [];
+      let expectedRole = 'user';
+      for (const msg of nonSystem) {
+        if (msg.role === expectedRole) {
+          alternating.push(msg);
+          expectedRole = expectedRole === 'user' ? 'assistant' : 'user';
+        } else if (msg.role === 'user' && expectedRole === 'assistant') {
+          // If we unexpectedly see a consecutive user message,
+          // merge its content with the previous user message.
+          alternating[alternating.length - 1].content += "\n\n" + msg.content;
+        }
+        // Skip any assistant message when a user message is expected.
+      }
+
+      // If after processing there is no valid alternating sequence (or the first non-system message isn’t a user),
+      // return only the system message (if available) so that the API isn’t sent an initial assistant message.
+      const finalMessages = systemMsg ? [systemMsg, ...alternating] : alternating;
+      return finalMessages;
     },
     // --- Modal & Misc UI Flow
     displayModal() {
