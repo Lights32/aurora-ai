@@ -179,11 +179,11 @@ button {
 }
 
 /* Group row layout */
-.group {
+.group-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   width: 100%;
   gap: var(--size-l);
 }
@@ -294,6 +294,8 @@ footer p {
   align-self: center;
   justify-self: center;
   text-align: center;
+  color: var(--color-text-secondary);
+
 }
 
 /* ==========================================================================
@@ -621,7 +623,8 @@ select {
   background: var(--color-surface-3);
   font-family: "Sora", sans-serif;
   color: var(--color-text-primary);
-  width: 8rem;
+  width: 100%;
+  flex: 1;
   outline: 2px solid var(--color-surface-3);
 }
 
@@ -747,6 +750,11 @@ select::selection {
   display: flex;
   flex-direction: column;
   gap: var(--size-xl);
+}
+
+.modal-content h3 {
+  padding-bottom: var(--size-l);
+  border-bottom: 1px solid var(--color-surface-3);
 }
 
 /* Modal actions (buttons row) */
@@ -1226,7 +1234,7 @@ pre:hover .copy-button {
      17. MEDIA QUERIES
      ========================================================================== */
 
-@media (max-width: 767px) {
+@media (max-width: 1200px) {
 
   /* Responsive styles can be added here */
   .message {
@@ -1279,6 +1287,16 @@ pre:hover .copy-button {
     display: flex;
     flex-direction: row;
     gap: var(--size-s);
+    width: 100%;
+    flex: 1;
+  }
+
+  .dropdown-holder {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex: 1;
+    min-width: 6.5rem;
   }
 
   /*

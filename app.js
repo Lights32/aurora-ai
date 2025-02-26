@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- Dependency Checker
-  ;(function validateDependencies () {
+  ; (function validateDependencies() {
     ;['marked', 'hljs', 'DOMPurify'].forEach(dep => {
       if (typeof window[dep] === 'undefined') {
         console.error(
@@ -64,12 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
       currentDetailLevel: 'balanced',
       activeModel: 'deepseek-chat',
       isLoading: false,
+      abortController: null,
       attachments: [],
       lastMessageTimestamp: 0,
       userProfile: {},
       uiElements: {}
     },
-    initializeApp () {
+    initializeApp() {
       this.validateApiKey()
       this.loadAppState()
       this.cacheDomElements()
@@ -82,14 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
       this.refreshUIStates()
       setInterval(this.updateTimestamps.bind(this), 1000)
     },
-    validateApiKey () {
+    validateApiKey() {
       if (this.configuration.apiKey === 'SK-DEMO') {
         console.warn(
           'Warning: Please set a valid API key via the settings modal dialog!'
         )
       }
     },
-    loadAppState () {
+    loadAppState() {
       try {
         const stored = localStorage.getItem('appState')
         const saved = stored ? JSON.parse(stored) : {}
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Failed to parse saved appState:', err)
       }
     },
-    cacheDomElements () {
+    cacheDomElements() {
       const uiElements = this.appState.uiElements
       uiElements.modeToggleButtons = document.querySelectorAll(
         '.mode-toggle-button'
@@ -143,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
       uiElements.userSettingsButton =
         document.getElementById('userSettingsButton')
     },
-    validateCriticalElements () {
+    validateCriticalElements() {
       const uiElements = this.appState.uiElements
       if (!uiElements.chatWindow) {
         console.error("Error: 'chatWindow' element not found in DOM.")
@@ -163,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         )
       }
     },
-    loadUserProfile () {
+    loadUserProfile() {
       try {
         const storedProfile = localStorage.getItem('userProfile')
         this.appState.userProfile = storedProfile
@@ -177,14 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
         this.appState.userProfile = { language: 'english' }
       }
     },
-    loadThemePreference () {
+    loadThemePreference() {
       const savedTheme = localStorage.getItem('themePreference')
       document.documentElement.setAttribute(
         'data-theme',
         savedTheme === 'light' ? 'light' : 'dark'
       )
     },
-    initializeChatHistory () {
+    initializeChatHistory() {
       if (!this.appState.chatHistory.length) {
         const { name = '', language = 'english' } = this.appState.userProfile
         this.appState.chatHistory.push({
@@ -200,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
       }
     },
-    generateSystemPrompt (mode, profileNameInput = '', language = 'english') {
+    generateSystemPrompt(mode, profileNameInput = '', language = 'english') {
       const namePart = profileNameInput
         ? `The user's name is ${profileNameInput}.  `
         : ''
@@ -216,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return prompts[mode] || prompts.analyst
     },
-    saveAppState () {
+    saveAppState() {
       const dataToSave = {
         chatHistory: this.appState.chatHistory,
         activeMode: this.appState.activeMode,
@@ -228,14 +229,14 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('appState', JSON.stringify(dataToSave))
     },
     // --- Utility Functions
-    debounce (func, delay) {
+    debounce(func, delay) {
       let timer
       return (...args) => {
         clearTimeout(timer)
         timer = setTimeout(() => func.apply(this, args), delay)
       }
     },
-    autoExpand (field) {
+    autoExpand(field) {
       const MIN_HEIGHT = 52
       field.style.height = 'auto'
       const computed = window.getComputedStyle(field)
@@ -244,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
       field.style.height = `${Math.min(naturalH, maxH)}px`
       field.style.overflowY = naturalH >= maxH ? 'auto' : 'hidden'
     },
-    animateTyping (element, rawText, onComplete, charsPerTick = 1, delay = 0) {
+    animateTyping(element, rawText, onComplete, charsPerTick = 1, delay = 0) {
       let index = 0
       let tempBuffer = ''
       const length = rawText.length
@@ -269,18 +270,18 @@ document.addEventListener('DOMContentLoaded', () => {
       typeChunk()
     },
     // Removed fake cursor functions from streaming (retain for animateTyping if desired)
-    attachCursor (element) {
+    attachCursor(element) {
       // (No-op for streaming)
     },
-    removeCursor (element) {
+    removeCursor(element) {
       // (No-op for streaming)
     },
-    highlightCodeBlocks (element) {
+    highlightCodeBlocks(element) {
       element.querySelectorAll('pre code').forEach(block => {
         hljs.highlightElement(block)
       })
     },
-    addCopyButtons (element) {
+    addCopyButtons(element) {
       element.querySelectorAll('pre').forEach(pre => {
         if (pre.querySelector('.copy-button')) return
         const copyButton = document.createElement('button')
@@ -304,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pre.appendChild(copyButton)
       })
     },
-    getRelativeTime (date) {
+    getRelativeTime(date) {
       const intervals = {
         year: 525600,
         month: 43800,
@@ -322,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       return 'Just now'
     },
-    scrollToBottomIfNeeded (force = false) {
+    scrollToBottomIfNeeded(force = false) {
       const container = this.appState.uiElements.chatWindow
       if (!container) return
       requestAnimationFrame(() => {
@@ -331,17 +332,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       })
     },
-    isNearBottom (container, threshold = 240) {
+    isNearBottom(container, threshold = 240) {
       return (
         container.scrollHeight - container.scrollTop - container.clientHeight <=
         threshold
       )
     },
-    estimateTokenCount (text) {
+    estimateTokenCount(text) {
       return Math.ceil(text.length / 4)
     },
     // --- Attachment Preview and File Reading
-    updateAttachmentPreviews () {
+    updateAttachmentPreviews() {
       const container = document.getElementById('attachmentPreviews')
       if (!container) return
       container.innerHTML = ''
@@ -364,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(preview)
       })
     },
-    async readFileContent (file) {
+    async readFileContent(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = e => {
@@ -381,12 +382,12 @@ document.addEventListener('DOMContentLoaded', () => {
       })
     },
     // --- Global Attachment Deletion (now encapsulated)
-    deleteAttachment (index) {
+    deleteAttachment(index) {
       this.appState.attachments.splice(index, 1)
       this.updateAttachmentPreviews()
     },
     // --- Message Rendering & Chat History
-    appendMessage (content, type, options = {}) {
+    appendMessage(content, type, options = {}) {
       const {
         insertAfter = null,
         messageId = null,
@@ -405,11 +406,10 @@ document.addEventListener('DOMContentLoaded', () => {
       let headerHTML = ''
       if (type === 'user') {
         headerHTML = `<div class="message-header">
-              <span class="message-username">${
-                this.appState.userProfile?.name
-                  ? this.appState.userProfile.name + ' (You)'
-                  : 'You'
-              }</span>
+              <span class="message-username">${this.appState.userProfile?.name
+            ? this.appState.userProfile.name + ' (You)'
+            : 'You'
+          }</span>
               <div class="row">
                 <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
               </div>
@@ -473,19 +473,19 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateTimestamps()
       this.updatePlaceholderVisibility()
     },
-    updateTimestamps () {
+    updateTimestamps() {
       document.querySelectorAll('.message-timestamp').forEach(el => {
         const timestampString = el.dataset.timestamp
         if (!timestampString) return
         el.textContent = this.getRelativeTime(new Date(timestampString))
       })
     },
-    removeMessage (messageElement) {
+    removeMessage(messageElement) {
       messageElement.remove()
       this.saveAppState()
       this.updatePlaceholderVisibility()
     },
-    renderChatHistory () {
+    renderChatHistory() {
       const uiElements = this.appState.uiElements
       uiElements.chatWindow.innerHTML = ''
       if (!uiElements.chatPlaceholderElement) {
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       this.scrollToBottomIfNeeded(true)
     },
-    updatePlaceholderVisibility () {
+    updatePlaceholderVisibility() {
       const hasMessages =
         this.appState.uiElements.chatWindow.querySelector('.message') !== null
       if (this.appState.uiElements.chatPlaceholderElement) {
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     // --- Event Handlers & UI Updates
-    onModeChange (element) {
+    onModeChange(element) {
       const newMode =
         element.tagName === 'SELECT' ? element.value : element.dataset.mode
       this.appState.activeMode = newMode
@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.animateElement(element)
       this.saveAppState()
     },
-    onModelChange (element) {
+    onModelChange(element) {
       const newModel =
         element.tagName === 'SELECT' ? element.value : element.dataset.model
       this.appState.activeModel = newModel
@@ -555,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.animateElement(element)
       this.saveAppState()
     },
-    onDetailLevelChange (event) {
+    onDetailLevelChange(event) {
       const button = event.currentTarget
       this.appState.uiElements.detailLevelButtons.forEach(btn => {
         console.log('Detail level button clicked:', button.dataset.detail)
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.animateElement(button)
       this.saveAppState()
     },
-    async handleFileUpload (e) {
+    async handleFileUpload(e) {
       const files = e.target.files
       if (!files?.length) return
       const allowedTypes = [
@@ -617,17 +617,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       e.target.value = ''
     },
-    handleInputKeyPress (e) {
+    handleInputKeyPress(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         this.sendMessage()
       }
     },
-    onWindowClick (e) {
+    onWindowClick(e) {
       if (e.target === this.appState.uiElements.confirmationModal)
         this.hideModal()
     },
-    onEscapeKey (e) {
+    onEscapeKey(e) {
       if (e.key === 'Escape') {
         if (this.appState.uiElements.confirmationModal.style.display === 'flex')
           this.hideModal()
@@ -637,13 +637,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     },
-    animateElement (element) {
+    animateElement(element) {
       element.animate(this.constants.animationSettings.buttonPress, {
         duration: this.constants.animationSettings.duration,
         easing: 'ease-out'
       })
     },
-    updateResponseTemperature () {
+    updateResponseTemperature() {
       switch (this.appState.activeMode) {
         case 'creator':
           this.appState.responseTemperature = 1.2
@@ -655,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
           this.appState.responseTemperature = 0.6
       }
     },
-    showLoadingIndicator () {
+    showLoadingIndicator() {
       const loading = document.createElement('div')
       loading.className = 'loading'
       loading.innerHTML = `<span>Aurora is thinking</span>
@@ -673,11 +673,11 @@ document.addEventListener('DOMContentLoaded', () => {
         container.scrollTop = container.scrollHeight
       }
     },
-    hideLoadingIndicator () {
+    hideLoadingIndicator() {
       const loading = document.querySelector('.loading')
       if (loading) loading.remove()
     },
-    async sendMessage () {
+    async sendMessage() {
       const messageContent =
         this.appState.uiElements.messageInputField.value.trim()
       if (
@@ -734,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.appState.attachments = []
       this.updateAttachmentPreviews()
       try {
-        this.appState.isLoading = true
+        this.appState.isLoading = true;
         this.showLoadingIndicator()
         const payload = {
           model: activeModel,
@@ -761,8 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errorData = { error: { message: await response.text() } }
           }
           throw new Error(
-            `API error: ${response.status} - ${
-              errorData.error?.message || 'Unknown error'
+            `API error: ${response.status} - ${errorData.error?.message || 'Unknown error'
             }`
           )
         }
@@ -784,7 +783,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     // New method for processing real streaming responses
-    async processStreamingResponse (response, messagePayload) {
+    async processStreamingResponse(response, messagePayload) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
@@ -965,28 +964,79 @@ document.addEventListener('DOMContentLoaded', () => {
         })
       }
     },
-    prepareMessagesForAPI () {
-      if (this.appState.activeModel === 'deepseek-reasoner') {
-        const systemMsg = this.appState.chatHistory.find(
-          m => m.role === 'system'
-        )
-        const lastUserMsg = [...this.appState.chatHistory]
-          .reverse()
-          .find(m => m.role === 'user')
-        return [systemMsg, lastUserMsg].filter(Boolean)
-      }
-      return this.appState.chatHistory.filter(m =>
+    prepareMessagesForAPI() {
+      const baseMessages = this.appState.chatHistory.filter(m =>
         ['system', 'user', 'assistant'].includes(m.role)
-      )
+      );
+
+      if (this.appState.activeModel === 'deepseek-reasoner') {
+        // Step 1: Merge consecutive messages from the same role
+        const mergedMessages = [];
+        let lastMessage = null;
+
+        for (const message of baseMessages) {
+          if (!lastMessage || lastMessage.role !== message.role) {
+            mergedMessages.push({ ...message });
+            lastMessage = message;
+          } else {
+            // Merge consecutive same-role messages
+            lastMessage.content += `\n\n${message.content}`;
+          }
+        }
+
+        // Step 2: Build valid message pairs while preserving order
+        const validSequence = [];
+        let pendingUserMessage = null;
+
+        for (const message of mergedMessages) {
+          if (message.role === 'system') {
+            validSequence.push(message);
+            continue;
+          }
+
+          if (message.role === 'user') {
+            if (pendingUserMessage) {
+              // Add previous user message without response
+              validSequence.push(pendingUserMessage);
+            }
+            pendingUserMessage = message;
+          } else if (message.role === 'assistant' && pendingUserMessage) {
+            validSequence.push(pendingUserMessage);
+            validSequence.push(message);
+            pendingUserMessage = null;
+          }
+        }
+
+        // Add any remaining user message at the end
+        if (pendingUserMessage) {
+          validSequence.push(pendingUserMessage);
+        }
+
+        // Step 3: Maintain conversation context with sliding window
+        const systemMessage = validSequence.find(m => m.role === 'system');
+        const interactionMessages = validSequence.filter(m => m.role !== 'system');
+        const recentInteractions = interactionMessages.slice(-6); // Keep last 3 pairs
+
+        // Step 4: Ensure final message is from user
+        const finalMessages = [systemMessage, ...recentInteractions];
+        if (finalMessages.length > 1 && finalMessages[finalMessages.length - 1].role !== 'user') {
+          finalMessages.pop(); // Remove trailing assistant message
+        }
+
+        return finalMessages.filter(m => m);
+      }
+
+      // For deepseek-chat, return all messages as-is
+      return baseMessages;
     },
     // --- Modal & Misc UI Flow
-    displayModal () {
+    displayModal() {
       this.appState.uiElements.confirmationModal.style.display = 'flex'
     },
-    hideModal () {
+    hideModal() {
       this.appState.uiElements.confirmationModal.style.display = 'none'
     },
-    confirmNewChat () {
+    confirmNewChat() {
       this.hideModal()
       localStorage.removeItem('appState')
       this.appState.chatHistory = []
@@ -1014,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateAttachmentPreviews()
       this.autoExpand(this.appState.uiElements.messageInputField)
     },
-    resetModeButtons () {
+    resetModeButtons() {
       if (!this.appState.uiElements.modeToggleButtons) {
         console.error('Error: modeToggleButtons not found in DOM.')
         return
@@ -1034,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Warning: Analyst mode button not found in DOM.')
       }
     },
-    updateModeUI () {
+    updateModeUI() {
       this.appState.uiElements.modeToggleButtons.forEach(btn => {
         btn.classList.toggle(
           'active',
@@ -1050,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', () => {
           this.appState.activeMode
       }
     },
-    updateDetailUI () {
+    updateDetailUI() {
       this.appState.uiElements.detailLevelButtons.forEach(btn => {
         btn.classList.toggle(
           'active',
@@ -1062,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         )
       })
     },
-    updateModelUI () {
+    updateModelUI() {
       this.appState.uiElements.modelSelectionButtons.forEach(btn => {
         btn.classList.toggle(
           'active',
@@ -1078,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
           this.appState.activeModel
       }
     },
-    attachEventListeners () {
+    attachEventListeners() {
       const uiElements = this.appState.uiElements
       uiElements.uploadButton?.addEventListener('click', () =>
         uiElements.fileInputElement.click()
@@ -1258,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (profileModalDialog) profileModalDialog.style.display = 'none'
         })
     },
-    refreshUIStates () {
+    refreshUIStates() {
       this.updateModeUI()
       this.updateDetailUI()
       this.updateModelUI()
