@@ -6,5 +6,4 @@ dist/
 .idea/
 *.log
 todo.txt
-app.js.oldstable
-app.js.oldstable2
+.stable/

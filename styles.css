@@ -683,7 +683,7 @@ select::selection {
   align-items: center;
   gap: var(--size-s);
   padding: var(--size-l) 1.75rem;
-  background: var(--color-surface-3);
+  background: linear-gradient(0deg, var(--color-surface-3), var(--color-surface-2));
   border-radius: var(--border-radius-default);
   margin: var(--size-s) 0;
   font-size: var(--size-base);
