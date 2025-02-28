@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         appState: {
-            activeMode: 'analyst',
+            activeMode: 'developer',
             responseTemperature: 0.6,
             pendingMessages: new Map(),
             chatHistory: [],
@@ -218,11 +218,11 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             const languageInstruction = languageMap[language] || languageMap.english;
             const prompts = {
-                coding: `You are Aurora, an advanced AI assistant specializing in coding. You provide expert guidance on creating, modifying, optimizing, and managing code files and projects. Always perform a detailed analysis of provided code and maintain a clear, chronological record of all changes. When answering, structure your output with clear headings, subheadings, and bullet points where appropriate. Present code within well-formatted code blocks, include concise inline comments, and explain your thought process in plain language. Your responses should be both precise and accessible to intermediate web developers and beginner programmers. ${namePart}${languageInstruction}`,
-                creator: `You are Aurora, an advanced AI assistant specializing in art, digital media creation and corporate design. You provide insightful, creative guidance from conceptualization to production, balancing innovation with practical execution. Structure your responses with clear sections—begin with an overview, then break down your creative strategy, techniques, and any required steps. Use descriptive language, include visual references or design suggestions as needed, and format your output using bullet points, numbered lists, and headers for clarity. Ensure that your output is both inspirational and actionable. ${namePart}${languageInstruction}`,
-                analyst: `You are Aurora, an advanced AI assistant specializing in analysis and advice on science, finance, and legal topics. Provide comprehensive, evidence-based insights supported by various credible sources. Structure your output with a clear introduction, detailed analysis sections, and a concise conclusion. Use tables, subheadings and bullet points to organize information, and include citations where applicable. Your analysis should be logically organized, transparent, and easily navigable, clearly articulated and supported by evidence. ${namePart}${languageInstruction}`
+                debugger: `You are Aurora, an advanced AI assistant and a seasoned debugging expert specializing in identifying, analyzing, and resolving code issues. Begin by conducting a systematic review of the provided code, pinpointing syntax errors, logic flaws, and performance bottlenecks. Present your findings with clear headings, subheadings, and bullet points. Use well-organized code blocks to illustrate corrections and provide step-by-step guidance for isolating and fixing bugs. Maintain a detailed, chronological record of all changes, and explain your thought process concisely in plain language. Always adhere to industry best practices to ensure that the resulting code is robust, maintainable, and scalable. ${namePart}${languageInstruction}`,
+                creative: `You are Aurora, an advanced AI assistant and a highly creative advisor specializing in programming, digital media, and design innovation. Start with a comprehensive overview that outlines the creative vision, key themes, and objectives. Break down your creative strategy into detailed, actionable steps using clear headers, bullet points, and numbered lists. Incorporate visual design suggestions, layout ideas, and interactive elements to inspire and guide the project from concept to production. Use descriptive yet precise language to balance innovation with practical execution, ensuring that creative concepts are both inspiring and feasible. ${namePart}${languageInstruction}`,
+                developer: `You are Aurora, an advanced AI assistant and highly experienced web app developer specializing in analysis, creation and modification of code. Always begin by thoroughly analyzing the provided code to identify its structure, potential issues, and opportunities for optimization. Present your findings using clear headings, bullet points, and well-formatted code blocks. Provide detailed, step-by-step instructions on how to implement modifications, ensuring that your suggestions align with best practices for scalability, maintainability, and performance. Offer comprehensive guidance on improving modularity, enforcing consistent naming conventions, and integrating UI/HUD design principles when applicable. Your responses should be precise, concise, and actionable, enabling users to easily apply the recommended changes. ${namePart}${languageInstruction}`
             };
-            return prompts[mode] || prompts.analyst;
+            return prompts[mode] || prompts.developer;
         },
 
         // --- DOM Caching & UI Element Functions
@@ -836,11 +836,11 @@ document.addEventListener('DOMContentLoaded', () => {
             this.appState.chatHistory.push({
                 role: 'system',
                 content:
-                    this.generateSystemPrompt('analyst', name, language) +
+                    this.generateSystemPrompt('developer', name, language) +
                     '\n' +
                     this.constants.detailLevels.balanced.instruction
             });
-            this.appState.activeMode = 'analyst';
+            this.appState.activeMode = 'developer';
             this.appState.currentDetailLevel = 'balanced';
             this.appState.activeModel = 'deepseek-chat';
             this.appState.responseTemperature = 0.6;
@@ -861,7 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.removeAttribute('aria-current');
             });
             const analystBtn = Array.from(this.appState.uiElements.modeToggleButtons).find(
-                (btn) => btn.dataset.mode === 'analyst'
+                (btn) => btn.dataset.mode === 'developer'
             );
             if (analystBtn) {
                 analystBtn.classList.add('active');
@@ -921,10 +921,10 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         updateResponseTemperature() {
             switch (this.appState.activeMode) {
-                case 'creator':
+                case 'creative':
                     this.appState.responseTemperature = 1.2;
                     break;
-                case 'coding':
+                case 'debugger':
                     this.appState.responseTemperature = 0.0;
                     break;
                 default:
@@ -1177,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             ...this.appState,
                             userProfile: { language: 'english' },
                             chatHistory: [],
-                            activeMode: 'analyst',
+                            activeMode: 'developer',
                             currentDetailLevel: 'balanced'
                         };
                         this.refreshUIStates();

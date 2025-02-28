@@ -294,6 +294,7 @@ footer p {
   text-align: center;
   font-size: calc(var(--size-base) * .8);
   color: var(--color-text-secondary);
+  display: none;
 }
 
 /* ==========================================================================
@@ -474,7 +475,7 @@ footer p {
 }
 
 /* Select only the last rendered error-message, user-message, ai-message and ai-cot-message to then set opacity to 1. */
-.chat-history> :is(.error-message, .user-message, .ai-message, .ai-ai-cot-message):last-child {
+.chat-history> :is(.error-message, .user-message, .ai-message, .ai-cot-message):last-child {
   opacity: 1;
 }
 
@@ -1146,17 +1147,17 @@ pre:hover .copy-button {
   gap: var(--size-s);
 }
 
-.ai-ai-cot-message {
+.ai-cot-message {
   border-left: 2px solid var(--color-surface-3);
   border-radius: 0;
   line-height: 1.6;
 }
 
-.ai-ai-cot-message p+p {
+.ai-cot-message p+p {
   margin-bottom: var(--size-l);
 }
 
-.ai-ai-cot-message:hover {
+.ai-cot-message:hover {
   opacity: 1;
 }
 
