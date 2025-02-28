@@ -18,6 +18,7 @@
   --color-success: #28a745;
   --color-warning: #ffc107;
   --color-error: #dc3545;
+  --color-debug: #ff00ff;
 
   /* Transitions & Shadows */
   --transition-default: cubic-bezier(0.4, 0, 0.2, 1);
@@ -48,8 +49,8 @@
   --color-success: #00c851;
   --color-warning: #fb3;
   --color-error: #f44;
-  --shadow-large: 0 var(--size-xl) 2.5rem -var(--size-s) #0000004d,
-    0 var(--size-s) var(--size-l) -var(--size-s) #0000004d;
+  --shadow-large: 0 var(--size-xl) 2.5rem -var(--size-s) rgba(0, 0, 0, 0.302),
+    0 var(--size-s) var(--size-l) -var(--size-s) rgba(0, 0, 0, 0.302);
 }
 
 /* ==========================================================================
@@ -339,6 +340,11 @@ footer p {
   text-align: center;
 }
 
+.chat-placeholder p {
+  text-wrap: balance;
+  text-wrap: pretty;
+}
+
 /* Message styling */
 .message {
   max-width: 67%;
@@ -460,15 +466,18 @@ footer p {
 }
 
 /* Increase opacity on hover or for recent messages */
-.error-message:last-of-type,
-.user-message:nth-last-of-type(2),
-.ai-message:last-of-type,
 .error-message:hover,
 .user-message:hover,
 .ai-message:hover {
   opacity: 1;
   transition: opacity 0.15s var(--transition-default);
 }
+
+/* Select only the last rendered error-message, user-message, ai-message and ai-cot-message to then set opacity to 1. */
+.chat-history> :is(.error-message, .user-message, .ai-message, .ai-ai-cot-message):last-child {
+  opacity: 1;
+}
+
 
 /* Message header (meta information) */
 .message-header {
@@ -486,11 +495,11 @@ footer p {
   border-bottom: 1px solid var(--color-surface-4);
 }
 
-.ai-cot-message .message-timestamp {
+.ai-ai-cot-message .message-timestamp {
   display: none;
 }
 
-.ai-cot-message .message-header {
+.ai-ai-cot-message .message-header {
   border-color: var(--color-surface-3);
 }
 
@@ -1137,17 +1146,17 @@ pre:hover .copy-button {
   gap: var(--size-s);
 }
 
-.ai-cot-message {
+.ai-ai-cot-message {
   border-left: 2px solid var(--color-surface-3);
   border-radius: 0;
   line-height: 1.6;
 }
 
-.ai-cot-message p+p {
+.ai-ai-cot-message p+p {
   margin-bottom: var(--size-l);
 }
 
-.ai-cot-message:hover {
+.ai-ai-cot-message:hover {
   opacity: 1;
 }
 
@@ -1239,7 +1248,7 @@ pre:hover .copy-button {
 
   /* Responsive styles can be added here */
   .message {
-    font-size: calc(var(--size-base) * 1.15) !important;
+    font-size: calc(var(--size-base) * 1);
     line-height: 1.6;
     max-width: calc(100% - var(--size-xxl));
   }

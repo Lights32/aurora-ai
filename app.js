@@ -292,14 +292,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (type === 'user') {
                 headerHTML = `<div class="message-header">
-                <span class="message-username">${this.appState.userProfile?.name
+                    <span class="message-username">${this.appState.userProfile?.name
                         ? this.appState.userProfile.name + ' (You)'
                         : 'You'
                     }</span>
-                <div class="row">
-                  <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
-                </div>
-              </div>`;
+                    <div class="row">
+                    <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
+                    </div>
+                </div>`;
             } else if (['ai', 'assistant', 'ai-cot'].includes(type)) {
                 const modeLabel = settings?.mode || this.appState.activeMode;
                 const estimatedTokens = this.estimateTokenCount(content);
@@ -311,13 +311,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const username =
                     type === 'ai-cot' ? 'Reasoning' : `<div>Aurora → ${modeLabel}</div>`;
                 headerHTML = `<div class="message-header">
-                <span class="message-username">${username}</span>
-                <div class="row">
-                  ${processingTimeHTML}
-                  ${tokenEstimateHTML}
-                  <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
-                </div>
-              </div>`;
+                    <span class="message-username">${username}</span>
+                    <div class="row">
+                    ${processingTimeHTML}
+                    ${tokenEstimateHTML}
+                    <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
+                    </div>
+                </div>`;
             }
 
             messageDiv.innerHTML = `${headerHTML}<span class="message-content"></span>`;
@@ -358,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.scrollToBottomIfNeeded();
             this.updateTimestamps();
             this.updatePlaceholderVisibility();
+            this.updateLastMessageOpacity();
         },
         updateTimestamps() {
             document.querySelectorAll('.message-timestamp').forEach((el) => {
@@ -370,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messageElement.remove();
             this.saveAppState();
             this.updatePlaceholderVisibility();
+            this.updateLastMessageOpacity();
         },
         renderChatHistory() {
             const ui = this.appState.uiElements;
@@ -403,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             this.scrollToBottomIfNeeded(true);
+            this.updateLastMessageOpacity();
         },
         updatePlaceholderVisibility() {
             const hasMessages =
@@ -415,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         estimateTokenCount(text) {
-            return Math.ceil(text.length / 4);
+            return Math.ceil(text.length / 3);
         },
         scrollToBottomIfNeeded(force = false) {
             const container = this.appState.uiElements.chatWindow;
@@ -627,11 +630,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const cotMessageDiv = document.createElement('div');
             cotMessageDiv.className = 'message ai-cot-message streaming typing';
             const cotHeaderHTML = `<div class="message-header">
-                <span class="message-username">Reasoning</span>
-                <div class="row">
-                  <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
-                </div>
-              </div>`;
+                    <span class="message-username">Reasoning</span>
+                    <div class="row">
+                    <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
+                    </div>
+                </div>`;
             cotMessageDiv.innerHTML = `${cotHeaderHTML}<span class="message-content"></span>`;
             const cotContentElement = cotMessageDiv.querySelector('.message-content');
             this.appState.uiElements.chatWindow.appendChild(cotMessageDiv);
@@ -669,11 +672,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                             aiMessageDiv = document.createElement('div');
                                             aiMessageDiv.className = 'message ai-message streaming typing';
                                             const aiHeaderHTML = `<div class="message-header">
-                                  <span class="message-username"><div>Aurora → ${modeLabel}</div></span>
-                                  <div class="row">
-                                    <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
-                                  </div>
-                                </div>`;
+                                    <span class="message-username"><div>Aurora → ${modeLabel}</div></span>
+                                    <div class="row">
+                                        <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
+                                    </div>
+                                    </div>`;
                                             aiMessageDiv.innerHTML = `${aiHeaderHTML}<span class="message-content"></span>`;
                                             aiContentElement = aiMessageDiv.querySelector('.message-content');
                                             this.appState.uiElements.chatWindow.appendChild(aiMessageDiv);
@@ -711,6 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: accumulatedFinal,
                 processingTime: processingTime
             });
+            this.updateLastMessageOpacity();
         },
         async processStandardResponse(reader, decoder, messagePayload, timestampISO, timeAgo, modeLabel) {
             let done = false;
@@ -718,11 +722,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const aiMessageDiv = document.createElement('div');
             aiMessageDiv.className = 'message ai-message streaming typing';
             const aiHeaderHTML = `<div class="message-header">
-          <span class="message-username"><div>Aurora → ${modeLabel}</div></span>
-          <div class="row">
-            <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
-          </div>
-        </div>`;
+            <span class="message-username"><div>Aurora → ${modeLabel}</div></span>
+            <div class="row">
+                <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
+            </div>
+            </div>`;
             aiMessageDiv.innerHTML = `${aiHeaderHTML}<span class="message-content"></span>`;
             const aiContentElement = aiMessageDiv.querySelector('.message-content');
             this.appState.uiElements.chatWindow.appendChild(aiMessageDiv);
@@ -769,6 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 content: accumulatedFinal,
                 processingTime: processingTime
             });
+            this.updateLastMessageOpacity();
         },
         prepareMessagesForAPI() {
             const includeCot = this.appState.activeModel === 'deepseek-reasoner';
@@ -930,11 +935,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const loading = document.createElement('div');
             loading.className = 'loading';
             loading.innerHTML = `<span>Aurora is thinking</span>
-                <div class="loading-dots">
-                  <div class="loading-dot"></div>
-                  <div class="loading-dot"></div>
-                  <div class="loading-dot"></div>
-                </div>`;
+                    <div class="loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    </div>`;
             const container = this.appState.uiElements.chatWindow;
             container.appendChild(loading);
             if (
@@ -1217,6 +1222,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const profileModalDialog = document.getElementById('profileModalDialog');
                     if (profileModalDialog) profileModalDialog.style.display = 'none';
                 });
+        },
+        updateLastMessageOpacity() {
+            const messageTypes = ['error', 'user', 'ai', 'ai-cot'];
+            messageTypes.forEach(type => {
+                // The messages have class names like "user-message", "ai-message", etc.
+                const messages = this.appState.uiElements.chatWindow.querySelectorAll(`.message.${type}-message`);
+                if (messages.length) {
+                    // Set the opacity of the last element to 1
+                    messages[messages.length - 1].style.opacity = '1';
+                }
+            });
         },
         refreshUIStates() {
             this.updateModeUI();
