@@ -69,7 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
             attachments: [],
             lastMessageTimestamp: 0,
             userProfile: {},
-            uiElements: {}
+            uiElements: {},
+            // Instruction presets now include a name and text.
+            instructionPresets: []
+            // Note: The "currentPreset" property is no longer needed.
         },
 
         // --- Utility Functions
@@ -147,6 +150,60 @@ document.addEventListener('DOMContentLoaded', () => {
             logWarn(message) {
                 console.warn(message);
             }
+        },
+
+        // --- Instruction Presets Feature
+        loadInstructionPresets() {
+            const stored = localStorage.getItem('instructionPresets');
+            this.appState.instructionPresets = stored ? JSON.parse(stored) : [];
+        },
+        saveInstructionPresets() {
+            localStorage.setItem('instructionPresets', JSON.stringify(this.appState.instructionPresets));
+        },
+        // The preset management modal remains for creating/editing presets.
+        renderPresetModal() {
+            const ui = this.appState.uiElements;
+            if (!ui.presetList) return;
+
+            // Clear existing content
+            ui.presetList.innerHTML = '';
+
+            // Add placeholder if no presets exist
+            if (this.appState.instructionPresets.length === 0) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'preset-list-placeholder';
+                placeholder.textContent = 'Create a preset instruction below';
+                ui.presetList.appendChild(placeholder);
+                return;
+            }
+
+            // Render presets if they exist
+            this.appState.instructionPresets.forEach((preset, index) => {
+                const listItem = document.createElement('div');
+                listItem.className = 'preset-list-item';
+                listItem.textContent = preset.name;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-preset-button';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    this.deleteInstructionPreset(index);
+                    this.renderPresetModal(); // Will re-check empty state
+                });
+
+                listItem.appendChild(deleteBtn);
+                ui.presetList.appendChild(listItem);
+            });
+        },
+        addInstructionPreset(name, text) {
+            if (!name.trim() || !text.trim()) return;
+            this.appState.instructionPresets.push({ name, text });
+            this.saveInstructionPresets();
+            this.renderPresetModal();
+        },
+        deleteInstructionPreset(index) {
+            this.appState.instructionPresets.splice(index, 1);
+            this.saveInstructionPresets();
         },
 
         // --- State Management Functions
@@ -248,6 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.apiKeyInputField = document.getElementById('apiKeyInputField');
             ui.clearCacheButton = document.getElementById('clearCacheButton');
             ui.userSettingsButton = document.getElementById('userSettingsButton');
+            // New elements for instruction presets (dropdown removed)
+            ui.presetModalDialog = document.getElementById('presetModalDialog');
+            ui.presetForm = document.getElementById('presetForm');
+            ui.presetNameInput = document.getElementById('presetNameInput');
+            ui.presetTextInput = document.getElementById('presetTextInput');
+            ui.presetList = document.getElementById('presetList');
         },
         validateCriticalElements() {
             const ui = this.appState.uiElements;
@@ -301,7 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
             } else if (['ai', 'assistant', 'ai-cot'].includes(type)) {
-                const modeLabel = settings?.mode || this.appState.activeMode;
                 const estimatedTokens = this.estimateTokenCount(content);
                 const processingTimeHTML =
                     type === 'ai' && processingTime
@@ -309,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         : '';
                 const tokenEstimateHTML = `<span class="message-token-estimate"><span style="color:var(--color-text-secondary);">♦&nbsp;</span>${estimatedTokens}&nbsp;Tokens</span>`;
                 const username =
-                    type === 'ai-cot' ? 'Reasoning' : `<div>Aurora → ${modeLabel}</div>`;
+                    type === 'ai-cot' ? 'Reasoning' : `<div>Aurora → ${settings?.mode || this.appState.activeMode}</div>`;
                 headerHTML = `<div class="message-header">
                     <span class="message-username">${username}</span>
                     <div class="row">
@@ -504,18 +566,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- API & Messaging
         async sendMessage() {
-            const messageContent =
-                this.appState.uiElements.messageInputField.value.trim();
-            if (
-                (!messageContent && this.appState.attachments.length === 0) ||
-                this.appState.isLoading
-            )
+            const ui = this.appState.uiElements;
+            let messageContent = ui.messageInputField.value.trim();
+
+            // Check if message starts with a slash (preset command)
+            if (messageContent.startsWith("/")) {
+                // Remove the leading slash and split tokens
+                const tokens = messageContent.slice(1).split(" ");
+                if (tokens.length >= 1) {
+                    const presetName = tokens[0];
+                    const additionalText = tokens.slice(1).join(" ");
+                    // Look up the preset by name (case-insensitive)
+                    const presetObj = this.appState.instructionPresets.find(
+                        p => p.name.toLowerCase() === presetName.toLowerCase()
+                    );
+                    if (presetObj) {
+                        // Prepend the preset instruction invisibly to the additional text
+                        messageContent = presetObj.text + "\n" + additionalText;
+                    } else {
+                        // If no matching preset, remove the slash and use the rest
+                        messageContent = tokens.slice(1).join(" ");
+                    }
+                }
+            }
+
+            let completeMessage = messageContent;
+            if ((!messageContent && this.appState.attachments.length === 0) || this.appState.isLoading)
                 return;
             const currentTime = Date.now();
             if (currentTime - this.appState.lastMessageTimestamp < 1000) return;
             this.appState.lastMessageTimestamp = currentTime;
             const { activeMode, currentDetailLevel, activeModel } = this.appState;
-            let completeMessage = messageContent;
             if (this.appState.attachments.length > 0) {
                 completeMessage += '\n\n[Attachments]';
                 this.appState.attachments.forEach((att) => {
@@ -546,16 +627,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 settings: messagePayload.settings
             });
             this.scrollToBottomIfNeeded(true);
-            const userMessageElement =
-                this.appState.uiElements.chatWindow.lastElementChild;
+            const userMessageElement = ui.chatWindow.lastElementChild;
             this.appState.pendingMessages.set(messagePayload.id, {
                 element: userMessageElement,
                 startTime: Date.now(),
                 settings: messagePayload.settings
             });
-            this.appState.uiElements.messageInputField.value = '';
+            ui.messageInputField.value = '';
             requestAnimationFrame(() =>
-                this.utils.autoExpand(this.appState.uiElements.messageInputField)
+                this.utils.autoExpand(ui.messageInputField)
             );
             this.appState.attachments = [];
             this.updateAttachmentPreviews();
@@ -587,8 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         errorData = { error: { message: await response.text() } };
                     }
                     throw new Error(
-                        `API error: ${response.status} - ${errorData.error?.message || 'Unknown error'
-                        }`
+                        `API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`
                     );
                 }
                 // Process streaming response in real time
@@ -626,7 +705,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let done = false;
             let accumulatedCot = '';
             let accumulatedFinal = '';
-            // Create and append the CoT message element
             const cotMessageDiv = document.createElement('div');
             cotMessageDiv.className = 'message ai-cot-message streaming typing';
             const cotHeaderHTML = `<div class="message-header">
@@ -639,7 +717,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const cotContentElement = cotMessageDiv.querySelector('.message-content');
             this.appState.uiElements.chatWindow.appendChild(cotMessageDiv);
 
-            // Prepare final answer element (appended upon first content)
             let aiMessageDiv = null;
             let aiContentElement = null;
             let aiAppended = false;
@@ -669,14 +746,16 @@ document.addEventListener('DOMContentLoaded', () => {
                                     }
                                     if (delta.content) {
                                         if (!aiAppended) {
-                                            aiMessageDiv = document.createElement('div');
-                                            aiMessageDiv.className = 'message ai-message streaming typing';
                                             const aiHeaderHTML = `<div class="message-header">
                                     <span class="message-username"><div>Aurora → ${modeLabel}</div></span>
                                     <div class="row">
+                                        <span class="message-request-time"></span>
+                                        <span class="message-token-estimate"></span>
                                         <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
                                     </div>
                                     </div>`;
+                                            aiMessageDiv = document.createElement('div');
+                                            aiMessageDiv.className = 'message ai-message streaming typing';
                                             aiMessageDiv.innerHTML = `${aiHeaderHTML}<span class="message-content"></span>`;
                                             aiContentElement = aiMessageDiv.querySelector('.message-content');
                                             this.appState.uiElements.chatWindow.appendChild(aiMessageDiv);
@@ -694,17 +773,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.scrollToBottomIfNeeded();
                 }
             }
-            // Finalize elements
-            cotMessageDiv.classList.remove('typing', 'streaming');
-            if (aiMessageDiv) {
-                aiMessageDiv.classList.remove('typing', 'streaming');
-                this.utils.highlightCodeBlocks(aiContentElement);
-                this.utils.addCopyButtons(aiContentElement);
-            }
             const pendingObj = this.appState.pendingMessages.get(messagePayload.id);
             const processingTime = pendingObj
                 ? ((Date.now() - pendingObj.startTime) / 1000).toFixed(2)
                 : 'N/A';
+
+            if (aiMessageDiv) {
+                const rowElem = aiMessageDiv.querySelector('.message-header .row');
+                if (rowElem) {
+                    const tokenElem = rowElem.querySelector('.message-token-estimate');
+                    if (tokenElem) {
+                        tokenElem.innerHTML = `<span style="color:var(--color-text-secondary);">♦&nbsp;</span>${this.estimateTokenCount(accumulatedFinal)}&nbsp;Tokens`;
+                    }
+                    const procElem = rowElem.querySelector('.message-request-time');
+                    if (procElem) {
+                        procElem.innerHTML = `${processingTime}&nbsp;s`;
+                    }
+                }
+                aiMessageDiv.classList.remove('typing', 'streaming');
+                this.utils.highlightCodeBlocks(aiContentElement);
+                this.utils.addCopyButtons(aiContentElement);
+            }
             this.appState.chatHistory.push({
                 role: 'assistant-cot',
                 content: accumulatedCot
@@ -715,18 +804,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 processingTime: processingTime
             });
             this.updateLastMessageOpacity();
+            this.appState.pendingMessages.delete(messagePayload.id);
         },
         async processStandardResponse(reader, decoder, messagePayload, timestampISO, timeAgo, modeLabel) {
             let done = false;
             let accumulatedFinal = '';
-            const aiMessageDiv = document.createElement('div');
-            aiMessageDiv.className = 'message ai-message streaming typing';
             const aiHeaderHTML = `<div class="message-header">
             <span class="message-username"><div>Aurora → ${modeLabel}</div></span>
             <div class="row">
+                <span class="message-request-time"></span>
+                <span class="message-token-estimate"></span>
                 <span class="message-timestamp" data-timestamp="${timestampISO}">${timeAgo}</span>
             </div>
             </div>`;
+            const aiMessageDiv = document.createElement('div');
+            aiMessageDiv.className = 'message ai-message streaming typing';
             aiMessageDiv.innerHTML = `${aiHeaderHTML}<span class="message-content"></span>`;
             const aiContentElement = aiMessageDiv.querySelector('.message-content');
             this.appState.uiElements.chatWindow.appendChild(aiMessageDiv);
@@ -761,19 +853,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.scrollToBottomIfNeeded();
                 }
             }
-            aiMessageDiv.classList.remove('typing', 'streaming');
-            this.utils.highlightCodeBlocks(aiContentElement);
-            this.utils.addCopyButtons(aiContentElement);
             const pendingObj = this.appState.pendingMessages.get(messagePayload.id);
             const processingTime = pendingObj
                 ? ((Date.now() - pendingObj.startTime) / 1000).toFixed(2)
                 : 'N/A';
+            const rowElem = aiMessageDiv.querySelector('.message-header .row');
+            if (rowElem) {
+                const tokenElem = rowElem.querySelector('.message-token-estimate');
+                if (tokenElem) {
+                    tokenElem.innerHTML = `<span style="color:var(--color-text-secondary);">♦&nbsp;</span>${this.estimateTokenCount(accumulatedFinal)}&nbsp;Tokens`;
+                }
+                const procElem = rowElem.querySelector('.message-request-time');
+                if (procElem) {
+                    procElem.innerHTML = `${processingTime}&nbsp;s`;
+                }
+            }
+            aiMessageDiv.classList.remove('typing', 'streaming');
+            this.utils.highlightCodeBlocks(aiContentElement);
+            this.utils.addCopyButtons(aiContentElement);
             this.appState.chatHistory.push({
                 role: 'assistant',
                 content: accumulatedFinal,
                 processingTime: processingTime
             });
             this.updateLastMessageOpacity();
+            this.appState.pendingMessages.delete(messagePayload.id);
         },
         prepareMessagesForAPI() {
             const includeCot = this.appState.activeModel === 'deepseek-reasoner';
@@ -922,13 +1026,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateResponseTemperature() {
             switch (this.appState.activeMode) {
                 case 'creative':
-                    this.appState.responseTemperature = 1.2;
+                    this.appState.responseTemperature = 0.6;
                     break;
                 case 'debugger':
-                    this.appState.responseTemperature = 0.0;
+                    this.appState.responseTemperature = 1.0;
                     break;
                 default:
-                    this.appState.responseTemperature = 0.6;
+                    this.appState.responseTemperature = 1.2;
             }
         },
         showLoadingIndicator() {
@@ -951,6 +1055,36 @@ document.addEventListener('DOMContentLoaded', () => {
         hideLoadingIndicator() {
             const loading = document.querySelector('.loading');
             if (loading) loading.remove();
+        },
+
+        // --- Instruction Presets Management (Now via chat command only)
+        attachPresetEventListeners() {
+            const ui = this.appState.uiElements;
+            if (ui.presetForm) {
+                ui.presetForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const presetName = ui.presetNameInput.value;
+                    const presetText = ui.presetTextInput.value;
+                    this.addInstructionPreset(presetName, presetText);
+                    ui.presetNameInput.value = '';
+                    ui.presetTextInput.value = '';
+                });
+            }
+            if (ui.presetModalDialog) {
+                const closePresetModalBtn = document.getElementById('closePresetModalButton');
+                if (closePresetModalBtn) {
+                    closePresetModalBtn.addEventListener('click', () => {
+                        ui.presetModalDialog.style.display = 'none';
+                    });
+                }
+                const managePresetsButton = document.getElementById('managePresetsButton');
+                if (managePresetsButton) {
+                    managePresetsButton.addEventListener('click', () => {
+                        ui.presetModalDialog.style.display = 'flex';
+                        this.renderPresetModal();
+                    });
+                }
+            }
         },
 
         // --- Event Handlers & UI Updates
@@ -1222,14 +1356,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const profileModalDialog = document.getElementById('profileModalDialog');
                     if (profileModalDialog) profileModalDialog.style.display = 'none';
                 });
+            // --- Instruction Presets Event Listeners (Management Modal Only)
+            this.attachPresetEventListeners();
         },
         updateLastMessageOpacity() {
             const messageTypes = ['error', 'user', 'ai', 'ai-cot'];
             messageTypes.forEach(type => {
-                // The messages have class names like "user-message", "ai-message", etc.
                 const messages = this.appState.uiElements.chatWindow.querySelectorAll(`.message.${type}-message`);
                 if (messages.length) {
-                    // Set the opacity of the last element to 1
                     messages[messages.length - 1].style.opacity = '1';
                 }
             });
@@ -1250,6 +1384,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.loadUserProfile();
             this.loadThemePreference();
             this.initializeChatHistory();
+            // Load saved instruction presets from localStorage
+            this.loadInstructionPresets();
+            // Attach event listeners (preset management modal remains; no dropdown UI now)
             this.attachEventListeners();
             this.renderChatHistory();
             this.refreshUIStates();

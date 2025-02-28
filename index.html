@@ -67,6 +67,7 @@
   <main class="app-container">
     <header class="app-header">
       <div class="topbar">
+
         <h1 class="gradient-text">
           Aurora&nbsp;AI<span class="model-badge">DeepSeek</span>
         </h1>
@@ -161,15 +162,14 @@
           <div class="settings-switcher">
             <label for="settings-buttons" class="ui-label">Settings</label>
             <div class="settings-buttons">
-              <button id="userProfileBtn" class="settings-button active">
+              <button id="userProfileBtn" class="settings-button">
                 <i class="fas fa-user"></i>
               </button>
               <button id="userSettingsButton" class="settings-button">
                 <i class="fas fa-cog"></i>
               </button>
-              <!-- Third Button "Test Pill" currently no function – will open a modal showing the live status of the API in the future.-->
-              <button class="settings-button">
-                <i class="fas fa-globe"></i>
+              <button id="managePresetsButton" class="settings-button" aria-label="Manage instruction presets">
+                <i class="fas fa-sliders"></i>
               </button>
             </div>
           </div>
@@ -183,6 +183,7 @@
     </footer>
   </main>
 
+  <!-- Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
       <h3>New Chat Confirmation</h3>
@@ -196,6 +197,7 @@
     </div>
   </div>
 
+  <!-- User Profile Modal -->
   <div id="profileModalDialog" class="modal">
     <div class="modal-content">
       <h3>User Profile</h3>
@@ -204,7 +206,6 @@
           <label for="profileNameInput">Name</label>
           <input type="text" id="profileNameInput" name="profileNameInput" placeholder="Enter your name" />
         </div>
-        <!-- The language dropdown has been removed from the user profile modal -->
         <div class="modal-actions">
           <button type="button" id="profileCancelButton" class="modal-btn">Cancel</button>
           <button type="submit" id="profileSave" class="modal-btn confirm">Save</button>
@@ -222,7 +223,6 @@
           <label for="apiKeyInputField">API Key</label>
           <input type="password" id="apiKeyInputField" name="apiKeyInputField" placeholder="Enter DeepSeek API key" />
         </div>
-        <!-- New Theme Dropdown -->
         <div class="form-group">
           <label for="themeSelect">Theme</label>
           <select id="themeSelect" name="themeSelect">
@@ -230,7 +230,6 @@
             <option value="light">Light</option>
           </select>
         </div>
-        <!-- New User Language Dropdown -->
         <div class="form-group">
           <label for="userLanguage">Language</label>
           <select id="userLanguage" name="userLanguage">
@@ -244,6 +243,33 @@
         <div class="modal-actions">
           <button type="button" id="cancelSettingsButton" class="modal-btn">Cancel</button>
           <button type="submit" id="settingsSave" class="modal-btn confirm">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Preset Management Modal -->
+  <div id="presetModalDialog" class="modal">
+    <div class="modal-content">
+      <h3>Manage Instruction Presets</h3>
+      <div id="presetList" class="preset-list">
+        <!-- Saved presets will appear here -->
+      </div>
+      <form id="presetForm">
+        <div class="form-group">
+          <label for="presetNameInput">Preset Name</label>
+          <input type="text" id="presetNameInput" placeholder="Enter preset name" />
+        </div>
+        <div class="form-group">
+          <div class="group-column">
+            <label for="presetTextInput">Preset Instruction</label>
+            <!-- Changed to a textarea for multi-line input -->
+            <textarea id="presetTextInput" rows="6" placeholder="Enter preset instruction"></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="closePresetModalButton" class="modal-btn">Close</button>
+          <button type="submit" class="modal-btn confirm">Add Preset</button>
         </div>
       </form>
     </div>

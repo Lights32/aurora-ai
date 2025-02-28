@@ -179,7 +179,7 @@ button {
   font-family: "Sora", sans-serif;
 }
 
-/* Group row layout */
+/* Group layout */
 .group-row {
   display: flex;
   flex-direction: row;
@@ -187,6 +187,13 @@ button {
   justify-content: space-between;
   width: 100%;
   gap: var(--size-l);
+}
+
+.group-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-l);
+  width: 100%;
 }
 
 /* Square Theme toggle button */
@@ -773,7 +780,7 @@ select::selection {
   display: flex;
   gap: var(--size-xl);
   justify-content: flex-end;
-  margin-top: var(--size-xl);
+  margin-top: var(--size-l);
 }
 
 /* Base modal button */
@@ -851,6 +858,11 @@ select::selection {
   justify-self: center;
   align-self: center;
   height: 3rem;
+}
+
+.settings-switcher {
+  display: gird;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 /* Base styling for mode, detail, model and settings buttons */
@@ -940,7 +952,7 @@ select::selection {
 
 .model-selection-button:hover,
 .settings-button:hover {
-  background: var(--color-surface-2);
+  background: var(--color-surface-1);
   transition: all 0.2s var(--transition-default);
 }
 
@@ -1349,6 +1361,131 @@ pre:hover .copy-button {
     text-align: center;
   }
 }
+
+/* ==========================================================================
+     18. INSTRUCTION PRESETS STYLES
+     ========================================================================== */
+
+/* Preset Insertion UI Container */
+.preset-container {
+  position: relative;
+  display: inline-block;
+  margin-top: var(--size-s);
+}
+
+/* Insert Preset Button */
+#insertPresetButton {
+  background: var(--color-primary-light);
+  color: var(--color-surface-0);
+  border: none;
+  padding: var(--size-xs) var(--size-m);
+  border-radius: var(--border-radius-default);
+  cursor: pointer;
+  font-size: var(--size-base);
+  transition: all 0.2s var(--transition-default);
+}
+
+#insertPresetButton:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Preset Dropdown */
+#presetDropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-surface-3);
+  border-radius: var(--border-radius-default);
+  box-shadow: var(--shadow-large);
+  padding: var(--size-s);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Preset Dropdown Item */
+.preset-item {
+  padding: var(--size-xs) var(--size-m);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-surface-3);
+  font-size: var(--size-base);
+  color: var(--color-text-primary);
+}
+
+.preset-item:last-child {
+  border-bottom: none;
+}
+
+.preset-item:hover {
+  background: var(--color-surface-3);
+}
+
+/* Preset Management Modal Overrides */
+#presetModalDialog .modal-content {
+  width: 100%;
+}
+
+textarea#presetTextInput {}
+
+/* Preset List inside the Modal */
+#presetList {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-height: 8rem;
+  overflow-y: auto;
+  border: 1px solid var(--color-surface-3);
+  border-radius: var(--border-radius-default);
+  padding: var(--size-s);
+}
+
+.preset-list-placeholder {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--size-xs) var(--size-m);
+  font-size: var(--size-base);
+  color: var(--color-text-primary);
+  border-radius: var(--border-radius-default);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* Individual Preset List Item */
+.preset-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--size-xs) var(--size-m);
+  border-bottom: 1px solid var(--color-surface-3);
+  font-size: var(--size-base);
+  color: var(--color-text-primary);
+}
+
+.preset-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Delete Preset Button */
+.delete-preset-button {
+  background: transparent;
+  border: none;
+  color: var(--color-error);
+  cursor: pointer;
+  font-size: var(--size-base);
+  padding: var(--size-xs);
+  transition: color 0.2s var(--transition-default);
+}
+
+.delete-preset-button:hover {
+  color: var(--color-error);
+  opacity: 0.8;
+}
+
+
+
 
 /* ==========================================================================
    TABLE STYLES
