@@ -1427,8 +1427,6 @@ pre:hover .copy-button {
   width: 100%;
 }
 
-textarea#presetTextInput {}
-
 /* Preset List inside the Modal */
 #presetList {
   display: grid;
